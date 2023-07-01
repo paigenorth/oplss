@@ -13,5 +13,5 @@ Exercises can be done on paper or using the UniMath library in the Coq proof ass
 
 3. Compile UniMath yourself + use Emacs: https://github.com/UniMath/UniMath/blob/master/INSTALL.md
 - You will want to have the source code of the UniMath library on your computer if you ever want to contribute to it.
-- Also note that it is certainly possible to compile UniMath yourself and use VSCode, or use the provided UniMath binaries with Emacs.
+- Also note that it is possible to mix up the instructions in 2 and 3, i.e. to compile UniMath yourself and use VSCode, or use the provided UniMath binaries with Emacs.
 
