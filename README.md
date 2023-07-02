@@ -1,5 +1,20 @@
 # Homotopy Type Theory (OPLSS 2023)
 
+## Resources
+
+### Textbooks
+1. [The HoTT Book](https://homotopytypetheory.org/book/)
+2. [Introduction to HoTT](https://arxiv.org/abs/2212.11082), Egbert Rijke
+
+### Expository papers
+1. [An introduction to univalent foundations for mathematicians
+](https://arxiv.org/abs/1711.01477v3), Daniel R. Grayson
+2. [Homotopy type theory: the logic of space](https://arxiv.org/abs/1703.03007), Michael Shulman
+
+### Original papers
+1. [Intuitionistic type theory](https://archive-pml.github.io/martin-lof/pdfs/Bibliopolis-Book-retypeset-1984.pdf), Per Martin-Löf (Lecture 1)
+
+
 ## UniMath (Coq)
 
 Exercises can be done on paper or using the UniMath library in the Coq proof assistant. (Or other libraries in other proof assistants if you dare!) Here are instructions for installing/using the UniMath library in the Coq proof assistant in order from easiest to hardest.
