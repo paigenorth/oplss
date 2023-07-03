@@ -156,6 +156,8 @@ Defined.
 
 (* Exercise 7 *)
 
+(* Note: this might hold definitionally based on how you defined add. If so, prove add n 0 = n instead.*)
+
 Definition left_unit (n : nat) : add 0 n = n.
 Proof.
   induction n.
