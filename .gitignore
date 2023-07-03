@@ -1,0 +1,15 @@
+.DS_Store
+*.out
+*~
+*.synctex.gz
+*.log
+*.aux
+*.fdb_latexmk
+*.fls
+*.pdf
+*.vos
+*.vok
+*.glob
+*.diagnose
+*.kaux
+*.toc
