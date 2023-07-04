@@ -263,7 +263,7 @@ The type of natural numbers is introduced using formation, introduction, elimina
 \begin{mathpar}
 \inferrule*[Right=Nat-comp-0]
 {\Gamma , n : \N \vdash D(n) \type \\\\ \Gamma \vdash z : D(0) \\\\ \Gamma , n : \N , h : D(n) \vdash i : D(S n)}
-{\Gamma \vdash \Ind_{\N}(a,b,0) \defeq a : D(0)}
+{\Gamma \vdash \Ind_{\N}(z,i,0) \defeq z : D(0)}
 \and
 \inferrule*[Right=Nat-comp-S]
 {\Gamma , n : \N \vdash D(n) \type \\\\ \Gamma \vdash z : D(0) \\\\ \Gamma , n : \N , h : D(n) \vdash i : D(S n)}
