@@ -207,15 +207,15 @@ The type of booleans is introduced using formation, introduction, elimination, a
 \item Elimination rule:
 
 \begin{mathpar}
-\inferrule*[Right=bool-elim]{\Gamma, b : \Bool \vdash D(b) \ \type, \ \Gamma \vdash f:D(\False), \ \Gamma \vdash t:D(\True)}{\Gamma, b:\Bool \vdash \Ind_{\Bool}(f,t,b):D(b)}
+\inferrule*[Right=bool-elim]{\Gamma, b : \Bool \vdash D(b) \type \\ \Gamma \vdash f:D(\False) \\ \Gamma \vdash t:D(\True)}{\Gamma, b:\Bool \vdash \Ind_{\Bool}(f,t,b):D(b)}
 \end{mathpar}
 
 \item Computation rules:
 
 \begin{mathpar}
-\inferrule*[Right=bool-comp-1]{\Gamma, b: \Bool \vdash D(b) \ \type, \ \Gamma \vdash f:D(\False), \ \Gamma \vdash t:D(\True)}{\Gamma \vdash \Ind_{\Bool}(f,t,\False) \defeq f : D(\False)}
+\inferrule*[Right=bool-comp-1]{\Gamma, b: \Bool \vdash D(b) \type \\ \Gamma \vdash f:D(\False) \\ \Gamma \vdash t:D(\True)}{\Gamma \vdash \Ind_{\Bool}(f,t,\False) \defeq f : D(\False)}
 
-\inferrule*[Right = bool-comp-2]{\Gamma, b: \Bool \vdash D(b) \ \type, \ \Gamma \vdash f:D(\False), \ \Gamma \vdash t:D(\True)}{\Gamma \vdash \Ind_{\Bool}(f,t,\True) \defeq t : D(\True)}
+\inferrule*[Right = bool-comp-2]{\Gamma, b: \Bool \vdash D(b) \type \\ \Gamma \vdash f:D(\False) \\ \Gamma \vdash t:D(\True)}{\Gamma \vdash \Ind_{\Bool}(f,t,\True) \defeq t : D(\True)}
 \end{mathpar}
 
 \end{itemize}
