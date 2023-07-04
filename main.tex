@@ -191,31 +191,33 @@ The type of booleans is introduced using formation, introduction, elimination, a
 \item Formation rule:
 
 \begin{mathpar}
-\inferrule*[right=bool-form]{ }{\Gamma \vdash \Bool \type}
+\inferrule*[right=Bool-Form]{ }{\Gamma \vdash \Bool \type}
 \end{mathpar}
 
 \item Introduction rules:
 
 \begin{mathpar}
-\inferrule*[Right=bool-intros-true]{ }{\Gamma \vdash \True : \Bool}
+\inferrule*[Right=Bool-Intros-True]{ }{\Gamma \vdash \True : \Bool}\and
 
-\
-
-\inferrule*[Right=bool-intros-false]{ }{\Gamma \vdash \False : \Bool}
+\inferrule*[Right=Bool-Intros-False]{ }{\Gamma \vdash \False : \Bool}
 \end{mathpar}
 
 \item Elimination rule:
 
 \begin{mathpar}
-\inferrule*[Right=bool-elim]{\Gamma, b : \Bool \vdash D(b) \type \\ \Gamma \vdash f:D(\False) \\ \Gamma \vdash t:D(\True)}{\Gamma, b:\Bool \vdash \Ind_{\Bool}(f,t,b):D(b)}
+\inferrule*[Right=Bool-Elim]{\Gamma, b : \Bool \vdash D(b) \type \\ \Gamma \vdash f:D(\False) \\ \Gamma \vdash t:D(\True)}{\Gamma, b:\Bool \vdash \Ind_{\Bool}(f,t,b):D(b)}
 \end{mathpar}
 
 \item Computation rules:
 
 \begin{mathpar}
-\inferrule*[Right=bool-comp-1]{\Gamma, b: \Bool \vdash D(b) \type \\ \Gamma \vdash f:D(\False) \\ \Gamma \vdash t:D(\True)}{\Gamma \vdash \Ind_{\Bool}(f,t,\False) \defeq f : D(\False)}
+\inferrule*[Right=Bool-Comp-1]
+{\Gamma, b: \Bool \vdash D(b) \type \\ \Gamma \vdash f:D(\False) \\ \Gamma \vdash t:D(\True)}
+{\Gamma \vdash \Ind_{\Bool}(f,t,\False) \defeq f : D(\False)}\and
 
-\inferrule*[Right = bool-comp-2]{\Gamma, b: \Bool \vdash D(b) \type \\ \Gamma \vdash f:D(\False) \\ \Gamma \vdash t:D(\True)}{\Gamma \vdash \Ind_{\Bool}(f,t,\True) \defeq t : D(\True)}
+\inferrule*[Right=Bool-Comp-2]
+{\Gamma, b: \Bool \vdash D(b) \type \\ \Gamma \vdash f:D(\False) \\ \Gamma \vdash t:D(\True)}
+{\Gamma \vdash \Ind_{\Bool}(f,t,\True) \defeq t : D(\True)}
 \end{mathpar}
 
 \end{itemize}
@@ -234,7 +236,7 @@ The type of natural numbers is introduced using formation, introduction, elimina
 \begin{mathpar}
 \inferrule*[Right=Nat-form]
 { }
-{\Gamma \vdash \mathbbm{N} \ \type}
+{\Gamma \vdash \mathbbm{N} \type}
 \end{mathpar}
 
 \item Introduction rules:
@@ -252,20 +254,20 @@ The type of natural numbers is introduced using formation, introduction, elimina
 \item Elimination rule:
 \begin{mathpar}
 \inferrule*[Right=Nat-elim]
-{\Gamma , x : \N \vdash D(x) \ \type \\\\ \Gamma \vdash a : D(0) \\\\ \Gamma , x : \N , y : D(x) \vdash b : D(S x)}
-{\Gamma , x : \N \vdash \text{ind}_{\N}(a,b,x) : D(x)}
+{\Gamma , n : \N \vdash D(n) \type \\\\ \Gamma \vdash z : D(0) \\\\ \Gamma , n : \N , h : D(n) \vdash i : D(S n)}
+{\Gamma , n : \N \vdash \Ind_{\N}(z,i,n) : D(n)}
 \end{mathpar}
 
 \item Computation rules:
 
 \begin{mathpar}
 \inferrule*[Right=Nat-comp-0]
-{\Gamma , x : \N \vdash D(x) \ \type \\\\ \Gamma \vdash a : D(0) \\\\ \Gamma , x : \N , y : D(x) \vdash b : D(S x)}
-{\Gamma \vdash \text{ind}_{\N}(a,b,0) \defeq a : D(0)}
+{\Gamma , n : \N \vdash D(n) \type \\\\ \Gamma \vdash z : D(0) \\\\ \Gamma , n : \N , h : D(n) \vdash i : D(S n)}
+{\Gamma \vdash \Ind_{\N}(a,b,0) \defeq a : D(0)}
 \and
 \inferrule*[Right=Nat-comp-S]
-{\Gamma , x : \N \vdash D(x) \ \type \\\\ \Gamma \vdash a : D(0) \\\\ \Gamma , x : \N , y : D(x) \vdash b : D(S x)}
-{\Gamma, x : \N , \text{ind}_{\N}(a,b,S n) \defeq b[\sfrac{\text{ind}_{\N}(a,b,x)}{y}] : D(S n)}
+{\Gamma , n : \N \vdash D(n) \type \\\\ \Gamma \vdash z : D(0) \\\\ \Gamma , n : \N , h : D(n) \vdash i : D(S n)}
+{\Gamma, n : \N , \Ind_{\N}(z,i,S n) \defeq i[\sfrac{\Ind_{\N}(z,i,n)}{h}] : D(S n)}
 \end{mathpar}
 
 \end{itemize}
