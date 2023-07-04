@@ -1,0 +1,287 @@
+\documentclass{amsart}
+\usepackage[utf8]{inputenc}
+\usepackage{enumitem}
+\usepackage{physics}
+\usepackage{bm}
+\usepackage{bbm}
+\usepackage{hyperref}
+\usepackage{tikz} 
+\usetikzlibrary{positioning, arrows, matrix, intersections}
+\usepackage{tabularx}
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\usepackage{xfrac}
+\usepackage{adjustbox}
+\usepackage{mathpartir}
+\usepackage{quiver}
+\usepackage{multicol}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}
+
+\usepackage{minted}
+\usemintedstyle{tango}
+
+\theoremstyle{definition}
+\newtheorem{eg}{Example}[section]
+\newtheorem{ex}{Exercise}[section]
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.12}
+\usepgfplotslibrary{fillbetween}
+
+\title{OPLSS 2023 \\
+Introduction to HoTT Notes}
+\author{Pavel Kovalev, Sean O'Connor, Cassia Torczon, Frank Tsai}
+\date{July 2023}
+
+
+\newcommand{\N}{\mathbbm{N}}
+\newcommand{\Z}{\mathbbm{Z}}
+\newcommand{\Q}{\mathbbm{Q}}
+\newcommand{\R}{\mathbbm{R}}
+\newcommand{\ctx}{\ensuremath{\mathsf{~ctx}}}
+\newcommand{\type}{\ensuremath{\mathsf{~type}}}
+\newcommand{\defeq}{\ensuremath{\overset{\cdot}{=}}}
+\newcommand{\Unit}{\ensuremath{\mathsf{1}}}
+\newcommand{\Bool}{\ensuremath{\mathsf{Bool}}}
+\newcommand{\W}{\ensuremath{\mathsf{W}}}
+\newcommand{\U}{\ensuremath{\mathcal{U}}}
+\newcommand{\True}{\ensuremath{\mathsf{true}}}
+\newcommand{\False}{\ensuremath{\mathsf{false}}}
+\newcommand{\Ind}{\ensuremath{\mathsf{ind}}}
+
+\newcommand{\newcommenter}[3]{%
+  \newcommand{#1}[1]{%
+    \textcolor{#2}{\small\textsf{[{#3}: {##1}]}}%
+  }%
+}
+\newcommenter{\FT}{red}{FT}
+
+\begin{document}
+
+\maketitle
+
+% https://q.uiver.app/#q=WzAsOCxbMSwxLCJcXHRleHR7SG9UVH0iXSxbMCwwLCJcXHRleHR7VHlwZSB0aGVvcnl9Il0sWzAsMSwiXFx0ZXh0e0Z1bmN0aW9uYWwgcHJvZ3JhbW1pbmd9Il0sWzEsMCwiXFx0ZXh0e0xvZ2ljfSJdLFsyLDAsIlxcdGV4dHtTZXQgdGhlb3J5fSJdLFsyLDEsIlxcdGV4dHtUb3BvcyB0aGVvcnl9Il0sWzIsMiwiXFx0ZXh0e0NhdGVnb3J5IHRoZW9yeX0iXSxbMCwyLCJcXHRleHR7SG9tb3RvcHkgdGhlb3J5fSJdLFs3LDAsIiIsMix7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMiwwLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzEsMCwiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFszLDAsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNCwwLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzUsMCwiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs2LDAsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMSwzLCIiLDEseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzMsNCwiIiwxLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs0LDUsIiIsMSx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNSw2LCIiLDEseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzYsNywiIiwxLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFsxLDIsIiIsMSx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNywxLCIiLDEseyJzaG9ydGVuIjp7InRhcmdldCI6NzB9LCJjb2xvdXIiOlsyMzcsMTAwLDYwXSwic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoic3F1aWdnbHkifSwiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dXQ==
+
+\section{Motivation}
+\label{sec:motivation}
+
+The fields of Type theory, Set theory, Topos theory, Category theory, Homotopy theory, and Functional programming all matured in the 20th century as their own distinct and influential fields of study. But near the beginning of the 21st century, more and more of the connections across these fields were recognized, which years later culminated in the incorporation of the field of Homotopy Type Theory (HoTT).
+
+\begin{figure}[h]
+    \centering
+    \[\begin{tikzcd}
+	{\text{Type theory}} & {\text{Logic}} & {\text{Set theory}} \\
+	{\text{Functional programming}} & {\text{HoTT}} & {\text{Topos theory}} \\
+	{\text{Homotopy theory}} && {\text{Category theory}}
+	\arrow[no head, from=3-1, to=2-2]
+	\arrow[no head, from=2-1, to=2-2]
+	\arrow[no head, from=1-1, to=2-2]
+	\arrow[no head, from=1-2, to=2-2]
+	\arrow[no head, from=1-3, to=2-2]
+	\arrow[no head, from=2-3, to=2-2]
+	\arrow[no head, from=3-3, to=2-2]
+	\arrow[no head, from=1-1, to=1-2]
+	\arrow[no head, from=1-2, to=1-3]
+	\arrow[no head, from=1-3, to=2-3]
+	\arrow[no head, from=2-3, to=3-3]
+	\arrow[no head, from=3-3, to=3-1]
+	\arrow[no head, from=1-1, to=2-1]
+	\arrow[color={rgb,255:red,0;green,0;blue,255}, shorten <=0pt, squiggly, no head, from=3-1, to=2-1]
+\end{tikzcd}\]
+    \caption{Connections across different fields of mathematics and computer science.
+    The blue squiggly line is the surprising connection between homotopy theory and functional programming.}
+    \label{fig:connections-across-fields}
+\end{figure}
+
+HoTT has strong ties to each of these other fields, and provides a fertile ground for investigating and proving \textcolor{blue}{\underline{surprising}} connections between each of them. This lecture series will provide an introduction to this growing field and will help illuminate its relation to these other areas of study.
+HoTT is built on top of Martin-L\"{o}f Type Theory (MLTT), which we introduce in \S\ref{sec:martin-lof-type-theory}.
+
+
+\section{Martin-L\"{o}f Type Theory}
+\label{sec:martin-lof-type-theory}
+MLTT consists of 3 basic judgments.
+An in-depth treatment of judgments can be found in \cite{ml:justif-log}.
+The first judgment expresses that $\Gamma$ is a valid context.
+\[
+\Gamma \ctx
+\]
+The second judgment expresses that $\tau$ is a type under the context $\Gamma$, presupposing that $\Gamma \ctx$.
+\[
+\Gamma \vdash \tau \type
+\]
+Finally, the last judgment expresses that $t$ is an element of type $\tau$ under the context $\Gamma$, presupposing that $\Gamma \ctx$ and that $\Gamma \vdash \tau \type$.
+\[
+\Gamma \vdash t : \tau
+\]
+These three judgments have their corresponding equality judgments.
+The first judgment expresses that two valid contexts, $\Gamma$ and $\Gamma'$, are definitionally equal.
+\[
+\Gamma \defeq \Gamma' \ctx
+\]
+The second judgment expresses that two types are definitionally equal under the same context $\Gamma$.
+\[
+\Gamma \vdash \tau \defeq \tau' \type
+\]
+And the last judgment expresses that two terms, $t$ and $t'$, of type $\tau$ under the context $\Gamma$ are definitionally equal.
+\[
+\Gamma \vdash t \defeq t' : \tau
+\]
+\begin{eg}[Some example types in MLTT]
+\hfill
+\begin{multicols}{2}
+\begin{enumerate}
+\item Empty type $\varnothing$.
+\item Unit type $\Unit$.
+\item The type of Boolean $\Bool$.
+\item The type of natural numbers $\N$.
+\item The types of well-founded trees $\W$.
+\item The types of equalities $=$.
+\item Dependent product types $\Sigma$.
+\item Dependent function types $\Pi$.
+\item Universes $\U_{i}$.
+\end{enumerate}
+\end{multicols}
+\end{eg}
+
+MLTT can be extended with additional features.
+Two possible extensions are summarized in Table \ref{tb:extensions-of-mltt}.
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c||c|c|}\hline
+        Type Theory & Univalence Axiom & Higher Inductive Types\\\hline
+        UTT  & \cmark & \xmark\\\hline
+        HoTT & \cmark & \cmark\\\hline
+    \end{tabular}
+    \caption{Univalent Type Theory (UTT) is MLTT extended with the Univalence Axiom, and HoTT is UTT extended with higher inductive types.}
+    \label{tb:extensions-of-mltt}
+\end{table}
+
+\section{Inductive Types}
+\label{sec:inductive-types}
+An inductive type is freely generated by its canonical elements.
+To define an inductive type in Coq, one can write
+\begin{figure}[H]
+    \centering
+    \begin{minted}{coq}
+        Inductive T : Type := foo : T | bar : T.
+    \end{minted}
+\end{figure}
+The type \texttt{T} is freely generated by its two canonical elements, namely \texttt{foo} and \texttt{bar}.
+Coq generates an elimination rule for \texttt{T} automatically.
+
+In general, to specify a new type in type theory we specify:
+\begin{enumerate}
+    \item how to form new types of this kind via \emph{formation rules}.
+    For example, if $A$ and $B$ are types then $A \to B$ is a type.
+    \item how to construct canonical elements of that type via \emph{introduction rules}.
+    For example, a function type has one introduction rule, namely $\lambda$-abstraction.
+    \item how to use elements of that type via \emph{elimination rules}.
+    For example, a function type has one elimination rule, namely function application.
+    \item how elimination rules act on introduction rules.
+    For example, applying a $\lambda$-abstraction $(\lambda x.e)$ to a term $e'$ is definitionally equal to substituting $e'$ for $x$ in $e$, namely $e[\sfrac{e'}{x}]$. 
+\end{enumerate}
+See the HoTT book \cite{hottbook}.
+
+\section{The booleans}
+
+The type of booleans is introduced using formation, introduction, elimination, and computation rules. 
+
+\begin{itemize}
+\item Formation rule:
+
+\begin{mathpar}
+\inferrule*[right=bool-form]{ }{\Gamma \vdash \Bool \type}
+\end{mathpar}
+
+\item Introduction rules:
+
+\begin{mathpar}
+\inferrule*[Right=bool-intros-true]{ }{\Gamma \vdash \True : \Bool}
+
+\
+
+\inferrule*[Right=bool-intros-false]{ }{\Gamma \vdash \False : \Bool}
+\end{mathpar}
+
+\item Elimination rule:
+
+\begin{mathpar}
+\inferrule*[Right=bool-elim]{\Gamma, b : \Bool \vdash D(b) \ \type, \ \Gamma \vdash f:D(\False), \ \Gamma \vdash t:D(\True)}{\Gamma, b:\Bool \vdash \Ind_{\Bool}(f,t,b):D(b)}
+\end{mathpar}
+
+\item Computation rules:
+
+\begin{mathpar}
+\inferrule*[Right=bool-comp-1]{\Gamma, b: \Bool \vdash D(b) \ \type, \ \Gamma \vdash f:D(\False), \ \Gamma \vdash t:D(\True)}{\Gamma \vdash \Ind_{\Bool}(f,t,\False) \defeq f : D(\False)}
+
+\inferrule*[Right = bool-comp-2]{\Gamma, b: \Bool \vdash D(b) \ \type, \ \Gamma \vdash f:D(\False), \ \Gamma \vdash t:D(\True)}{\Gamma \vdash \Ind_{\Bool}(f,t,\True) \defeq t : D(\True)}
+\end{mathpar}
+
+\end{itemize}
+
+\begin{ex}
+    Define a function $\mathsf{not}: \Bool \to \Bool$.
+    Note that $\to$ works as usual.
+\end{ex}
+
+\section{The natural numbers $\N$}
+The type of natural numbers is introduced using formation, introduction, elimination, and computation rules. 
+
+\begin{itemize}
+\item Formation rule:
+
+\begin{mathpar}
+\inferrule*[Right=Nat-form]
+{ }
+{\Gamma \vdash \mathbbm{N} \ \type}
+\end{mathpar}
+
+\item Introduction rules:
+
+\begin{mathpar}
+\inferrule*[Right=Nat-intro-0]
+{ }
+{\Gamma \vdash 0 : \N}
+\and
+\inferrule*[Right=Nat-intro-S]
+{\Gamma \vdash n : \N}
+{\Gamma \vdash S n : \N}
+\end{mathpar}
+
+\item Elimination rule:
+\begin{mathpar}
+\inferrule*[Right=Nat-elim]
+{\Gamma , x : \N \vdash D(x) \ \type \\\\ \Gamma \vdash a : D(0) \\\\ \Gamma , x : \N , y : D(x) \vdash b : D(S x)}
+{\Gamma , x : \N \vdash \text{ind}_{\N}(a,b,x) : D(x)}
+\end{mathpar}
+
+\item Computation rules:
+
+\begin{mathpar}
+\inferrule*[Right=Nat-comp-0]
+{\Gamma , x : \N \vdash D(x) \ \type \\\\ \Gamma \vdash a : D(0) \\\\ \Gamma , x : \N , y : D(x) \vdash b : D(S x)}
+{\Gamma \vdash \text{ind}_{\N}(a,b,0) \defeq a : D(0)}
+\and
+\inferrule*[Right=Nat-comp-S]
+{\Gamma , x : \N \vdash D(x) \ \type \\\\ \Gamma \vdash a : D(0) \\\\ \Gamma , x : \N , y : D(x) \vdash b : D(S x)}
+{\Gamma, x : \N , \text{ind}_{\N}(a,b,S n) \defeq b[\sfrac{\text{ind}_{\N}(a,b,x)}{y}] : D(S n)}
+\end{mathpar}
+
+\end{itemize}
+
+\begin{ex}
+    Define $\iota : \Bool \to \N$.
+\end{ex}
+
+\begin{ex}
+    Define $\mathsf{add} : \N \to \N \to \N$.
+\end{ex}
+
+\begin{ex}
+    Define $\mathsf{mult} :  \N \to \N \to \N$.
+\end{ex}
+
+\bibliographystyle{alpha}
+\bibliography{all}
+\end{document}
