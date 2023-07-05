@@ -24,12 +24,14 @@
 \theoremstyle{definition}
 \newtheorem{eg}{Example}[section]
 \newtheorem{ex}{Exercise}[section]
+\newtheorem*{sol}{Solution}
+\newtheorem*{warn}{Warning}
 
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.12}
 \usepgfplotslibrary{fillbetween}
 
-\title{OPLSS 2023 \\
+\title[Introduction to HoTT Notes]{OPLSS 2023 \\
 Introduction to HoTT Notes}
 \author{Pavel Kovalev, Sean O'Connor, Cassia Torczon, Frank Tsai}
 \date{July 2023}
@@ -44,11 +46,17 @@ Introduction to HoTT Notes}
 \newcommand{\defeq}{\ensuremath{\overset{\cdot}{=}}}
 \newcommand{\Unit}{\ensuremath{\mathsf{1}}}
 \newcommand{\Bool}{\ensuremath{\mathsf{Bool}}}
+\newcommand{\Prop}{\ensuremath{\mathsf{Prop}}}
+\newcommand{\isProp}{\ensuremath{\mathsf{isProp}}}
+\newcommand{\Set}{\ensuremath{\mathsf{Set}}}
+\newcommand{\isSet}{\ensuremath{\mathsf{isSet}}}
+\newcommand{\Grp}{\ensuremath{\mathsf{Grp}}}
 \newcommand{\W}{\ensuremath{\mathsf{W}}}
 \newcommand{\U}{\ensuremath{\mathcal{U}}}
 \newcommand{\True}{\ensuremath{\mathsf{true}}}
 \newcommand{\False}{\ensuremath{\mathsf{false}}}
 \newcommand{\Ind}{\ensuremath{\mathsf{ind}}}
+\newcommand{\Hole}[1]{\fbox{?#1}}
 
 \newcommand{\newcommenter}[3]{%
   \newcommand{#1}[1]{%
@@ -57,11 +65,13 @@ Introduction to HoTT Notes}
 }
 \newcommenter{\FT}{red}{FT}
 
+\usepackage[normalem]{ulem}
+\newcommand{\surprising}{\textcolor{blue}{s\uwave{urprisin}g} $\text{}$}
+
 \begin{document}
 
 \maketitle
-
-% https://q.uiver.app/#q=WzAsOCxbMSwxLCJcXHRleHR7SG9UVH0iXSxbMCwwLCJcXHRleHR7VHlwZSB0aGVvcnl9Il0sWzAsMSwiXFx0ZXh0e0Z1bmN0aW9uYWwgcHJvZ3JhbW1pbmd9Il0sWzEsMCwiXFx0ZXh0e0xvZ2ljfSJdLFsyLDAsIlxcdGV4dHtTZXQgdGhlb3J5fSJdLFsyLDEsIlxcdGV4dHtUb3BvcyB0aGVvcnl9Il0sWzIsMiwiXFx0ZXh0e0NhdGVnb3J5IHRoZW9yeX0iXSxbMCwyLCJcXHRleHR7SG9tb3RvcHkgdGhlb3J5fSJdLFs3LDAsIiIsMix7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMiwwLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzEsMCwiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFszLDAsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNCwwLCIiLDAseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzUsMCwiIiwwLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs2LDAsIiIsMCx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbMSwzLCIiLDEseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzMsNCwiIiwxLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFs0LDUsIiIsMSx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNSw2LCIiLDEseyJzdHlsZSI6eyJoZWFkIjp7Im5hbWUiOiJub25lIn19fV0sWzYsNywiIiwxLHsic3R5bGUiOnsiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dLFsxLDIsIiIsMSx7InN0eWxlIjp7ImhlYWQiOnsibmFtZSI6Im5vbmUifX19XSxbNywxLCIiLDEseyJzaG9ydGVuIjp7InRhcmdldCI6NzB9LCJjb2xvdXIiOlsyMzcsMTAwLDYwXSwic3R5bGUiOnsiYm9keSI6eyJuYW1lIjoic3F1aWdnbHkifSwiaGVhZCI6eyJuYW1lIjoibm9uZSJ9fX1dXQ==
+\tableofcontents
 
 \section{Motivation}
 \label{sec:motivation}
@@ -70,31 +80,13 @@ The fields of Type theory, Set theory, Topos theory, Category theory, Homotopy t
 
 \begin{figure}[h]
     \centering
-    \[\begin{tikzcd}
-	{\text{Type theory}} & {\text{Logic}} & {\text{Set theory}} \\
-	{\text{Functional programming}} & {\text{HoTT}} & {\text{Topos theory}} \\
-	{\text{Homotopy theory}} && {\text{Category theory}}
-	\arrow[no head, from=3-1, to=2-2]
-	\arrow[no head, from=2-1, to=2-2]
-	\arrow[no head, from=1-1, to=2-2]
-	\arrow[no head, from=1-2, to=2-2]
-	\arrow[no head, from=1-3, to=2-2]
-	\arrow[no head, from=2-3, to=2-2]
-	\arrow[no head, from=3-3, to=2-2]
-	\arrow[no head, from=1-1, to=1-2]
-	\arrow[no head, from=1-2, to=1-3]
-	\arrow[no head, from=1-3, to=2-3]
-	\arrow[no head, from=2-3, to=3-3]
-	\arrow[no head, from=3-3, to=3-1]
-	\arrow[no head, from=1-1, to=2-1]
-	\arrow[color={rgb,255:red,0;green,0;blue,255}, shorten <=0pt, squiggly, no head, from=3-1, to=2-1]
-\end{tikzcd}\]
+    \input{map-of-hott}
     \caption{Connections across different fields of mathematics and computer science.
     The blue squiggly line is the surprising connection between homotopy theory and functional programming.}
     \label{fig:connections-across-fields}
 \end{figure}
 
-HoTT has strong ties to each of these other fields, and provides a fertile ground for investigating and proving \textcolor{blue}{\underline{surprising}} connections between each of them. This lecture series will provide an introduction to this growing field and will help illuminate its relation to these other areas of study.
+HoTT has strong ties to each of these other fields, and provides a fertile ground for investigating and proving \surprising connections between each of them. This lecture series will provide an introduction to this growing field and will help illuminate its relation to these other areas of study.
 HoTT is built on top of Martin-L\"{o}f Type Theory (MLTT), which we introduce in \S\ref{sec:martin-lof-type-theory}.
 
 
@@ -157,7 +149,7 @@ Two possible extensions are summarized in Table \ref{tb:extensions-of-mltt}.
     \label{tb:extensions-of-mltt}
 \end{table}
 
-\section{Inductive Types}
+\subsection{Inductive Types}
 \label{sec:inductive-types}
 An inductive type is freely generated by its canonical elements.
 To define an inductive type in Coq, one can write
@@ -183,9 +175,10 @@ In general, to specify a new type in type theory we specify:
 \end{enumerate}
 See the HoTT book \cite{hottbook}.
 
-\section{The booleans}
+\subsection{The Booleans}
+\label{sec:the-booleans}
 
-The type of booleans is introduced using formation, introduction, elimination, and computation rules. 
+The type of Booleans is introduced using formation, introduction, elimination, and computation rules. 
 
 \begin{itemize}
 \item Formation rule:
@@ -222,19 +215,20 @@ The type of booleans is introduced using formation, introduction, elimination, a
 
 \end{itemize}
 
-\begin{ex}
+\begin{ex}\label{ex:not}
     Define a function $\mathsf{not}: \Bool \to \Bool$.
     Note that $\to$ works as usual.
 \end{ex}
 
-\section{The natural numbers $\N$}
-The type of natural numbers is introduced using formation, introduction, elimination, and computation rules. 
+\subsection{The Natural Numbers}
+\label{sec:the-natural-numbers}
+The type of natural numbers is presented using formation, introduction, elimination, and computation rules. 
 
 \begin{itemize}
 \item Formation rule:
 
 \begin{mathpar}
-\inferrule*[Right=Nat-form]
+\inferrule*[Right=$\N$-form]
 { }
 {\Gamma \vdash \mathbbm{N} \type}
 \end{mathpar}
@@ -242,18 +236,18 @@ The type of natural numbers is introduced using formation, introduction, elimina
 \item Introduction rules:
 
 \begin{mathpar}
-\inferrule*[Right=Nat-intro-0]
+\inferrule*[Right=$\N$-intro-0]
 { }
 {\Gamma \vdash 0 : \N}
 \and
-\inferrule*[Right=Nat-intro-S]
+\inferrule*[Right=$\N$-intro-S]
 {\Gamma \vdash n : \N}
 {\Gamma \vdash S n : \N}
 \end{mathpar}
 
 \item Elimination rule:
 \begin{mathpar}
-\inferrule*[Right=Nat-elim]
+\inferrule*[Right=$\N$-elim]
 {\Gamma , n : \N \vdash D(n) \type \\\\ \Gamma \vdash z : D(0) \\\\ \Gamma , n : \N , h : D(n) \vdash i : D(S n)}
 {\Gamma , n : \N \vdash \Ind_{\N}(z,i,n) : D(n)}
 \end{mathpar}
@@ -261,29 +255,478 @@ The type of natural numbers is introduced using formation, introduction, elimina
 \item Computation rules:
 
 \begin{mathpar}
-\inferrule*[Right=Nat-comp-0]
+\inferrule*[Right=$\N$-comp-0]
 {\Gamma , n : \N \vdash D(n) \type \\\\ \Gamma \vdash z : D(0) \\\\ \Gamma , n : \N , h : D(n) \vdash i : D(S n)}
 {\Gamma \vdash \Ind_{\N}(z,i,0) \defeq z : D(0)}
 \and
-\inferrule*[Right=Nat-comp-S]
+\inferrule*[Right=$\N$-comp-S]
 {\Gamma , n : \N \vdash D(n) \type \\\\ \Gamma \vdash z : D(0) \\\\ \Gamma , n : \N , h : D(n) \vdash i : D(S n)}
-{\Gamma, n : \N , \Ind_{\N}(z,i,S n) \defeq i[\sfrac{\Ind_{\N}(z,i,n)}{h}] : D(S n)}
+{\Gamma, n : \N \vdash \Ind_{\N}(z,i,S n) \defeq i[\sfrac{\Ind_{\N}(z,i,n)}{h}] : D(S n)}
 \end{mathpar}
 
 \end{itemize}
 
-\begin{ex}
+\begin{ex}\label{ex:iota}
     Define $\iota : \Bool \to \N$.
 \end{ex}
 
-\begin{ex}
+\begin{ex}\label{ex:add}
     Define $\mathsf{add} : \N \to \N \to \N$.
 \end{ex}
 
-\begin{ex}
+\begin{ex}\label{ex:mult}
     Define $\mathsf{mult} :  \N \to \N \to \N$.
 \end{ex}
 
+\subsection{$\Sigma$-Types}
+\label{sec:sigma-types}
+
+Given $b : B \vdash E (b) \type$
+(in Coq: \mintinline{coq}{E (b : B) : UU}),
+we want to form a type whose terms are dependent pairs $\langle b, e \rangle$ where $b : B$, $e : E(b)$. We present this type using formation, introduction, elimination, and computation rules.
+
+\begin{itemize}
+\item Formation rule:
+
+\begin{mathpar}
+\inferrule*[Right=$\Sigma$-Form]
+{\Gamma, x : B \vdash E(x) \type}
+{\Gamma \vdash \Sigma_{x : B} E(x) \type}
+\end{mathpar}
+
+\item Introduction rule:
+
+\begin{mathpar}
+\inferrule*[Right=$\Sigma$-Intro]
+{\Gamma \vdash b : B \\\\ \Gamma \vdash e : E(b)}
+{\Gamma \vdash \langle b, e \rangle : \Sigma_{x : B} E(x)}
+\end{mathpar}
+
+
+\item Elimination rule:
+\begin{mathpar}
+\inferrule*[Right=$\Sigma$-Elim]
+{\Gamma , z : \Sigma_{x : B} E(x) \vdash D(z) \type \\\\ 
+ \Gamma, x : B, y : E(x) \vdash d(x,y) : D(\langle x, y \rangle)}
+{\Gamma , z : \Sigma_{x : B} E(x) \vdash \Ind_{\Sigma,d}(z) : D(z)}
+\end{mathpar}
+
+\item Computation rule:
+
+\begin{mathpar}
+\inferrule*[Right=$\Sigma$-Comp]
+{\Gamma , z : \Sigma_{x : B} E(x) \vdash D(z) \type \\\\ 
+ \Gamma, x : B, y : E(x) \vdash d(x,y) : D(\langle x, y \rangle)}
+{\Gamma , x : B, y : E(x) \vdash \Ind_{\Sigma,d}(\langle x, y \rangle) \defeq d(x, y) : D(\langle x, y \rangle)}
+\end{mathpar}
+\end{itemize}
+
+We can think of $\Sigma_{x : B}E(x)$ as the disjoint union of sets indexed by elements of $B$.
+See Figure \ref{fig:sigma-type-as-total-space}.
+\begin{figure}[h]
+    \centering
+    \input{fibration.tex}
+    \caption{A graphical illustration of a $\Sigma$-type over some type $B$.}
+    \label{fig:sigma-type-as-total-space}
+\end{figure}
+
+\begin{ex}
+Construct a function $\pi_1 : \Sigma_{x : B} E(x) \to B$.
+\end{ex}
+
+\begin{ex}
+Construct a function $\pi_2 : \Pi_{s : \Sigma_{x : B} E(x)} E(\pi_1 s)$. This is a dependently typed function that takes a term $s : \Sigma_{x : B} E(x)$ and returns something of type $E(\pi_1 s)$.
+\end{ex}
+
+\section{Types as logic, sets, and programs}
+This section compares previously presented terms in light of the Curry-Howard correspondence, which relates logic to programs, and the Brouwer–Heyting–Kolmogorov interpretation, which provides an explanation of constructive logic. 
+Table \ref{tb:types-as-logic-sets-programs} summarizes the interpretation of type theory in logic, sets, and programs.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c||p{0.2\textwidth}|p{0.2\textwidth}|p{0.3\textwidth}|}\hline
+        Type Theory & Logic & Sets & Programs \\\hline
+        $\Gamma \ctx$ & hypotheses & indexing set & names in scope \\\hline
+        $\Gamma \vdash T \type$ & predicate $T$ on $\Gamma$ & family $T$ of sets indexed by $\Gamma$ & program specification using values from $\Gamma$\\\hline
+        $\Gamma \vdash t : T$ & proof of $T$ & elements & program $t$ meeting the specification $T$\\\hline
+        $\N$ & - & $\N$ & collection of programs with no input that output a natural number \\\hline
+        $S + T$  $(\Sigma_{i : \Bool} T_i)$ & $\vee$ (disjunction) & $\sqcup$ (disjoint union) & $\vee$ over specifications \\\hline
+        $S \times T$  $(\Sigma_{s : S} T)$ & $\wedge$ (conjunction) & $\times$ (Cartesian product) & $\wedge$ over specifications \\\hline
+        $S \rightarrow T$  $(\Pi_{s : S} T)$ & $\Rightarrow$ (implication) & $T^S$ (exponential) & turns a program of type $S$ into a program of type $T$ \\\hline
+        $\Sigma_{b : B} E(b)$ & $\exists b:B, E(b)$ (constructive existential) & $\sqcup_{b : B}E(b)$ & specification for producing an element $b : B$ meeting specification $E(b)$ \\\hline
+        $\Pi_{b : B} E(b)$ & $\forall b : B, E(b)$ & $\Pi$ (set of sections) & specification for taking any program $b : B$ and outputting a program matching specification $E(b)$ \\\hline
+    \end{tabular}
+    \caption{Type theory interpreted in logic, sets, and programs.}
+    \label{tb:types-as-logic-sets-programs}
+\end{table}
+
+\begin{eg}
+    Given $x : \Bool \vdash \N \type$, the type $\Sigma_{x : \Bool} \N$ corresponds to the set $\N \sqcup \N$, and $\Pi_{x : \Bool} \N$ corresponds to the set $\N \times \N$ because there is no dependency between $x$ and $\N$ in the $\Pi$ type.
+\end{eg}
+
+\section{Identity Type}
+
+\begin{figure}[h]
+    \centering
+    \input{internalize}
+    \caption{$\Sigma$-type internalizes context extension.}
+    \label{fig:internalize}
+\end{figure}
+
+$\mathbf{Id}$ is a strange inductive type. Why do we need it?
+
+Answer 1: There are many equalities that hold only propositionally.
+
+Example:
+
+We have that $\mathbf{add} (x, 0) \defeq x$ and
+$\mathbf{add} (x, s y) \defeq s (\mathbf{add}(x,y))$, but
+$\mathbf{add}(0,x) \defeq x$ is not provable.
+
+Answer 2: We already have a notion of equality: \textbf{judgemental equality} ($\defeq$). The identity type gives us another notion, \textbf{propositional equality}. The logical interpretation of this is that if, under the Curry-Howard correspondence, propositions are types and proofs are terms, then in order to prove an equality that is not provable judgmentally, we want to produce a term of a type of equalities.
+
+Type formers often internalize existing concepts, i.e., turn them into types. For example, $\mathbf{bool}$, $\N$, $\emptyset$, $\mathbbm{1}$, internalize existing notions of those things; $\Sigma$ internalizes context extension; $\Pi$ internalizes dependent types; and the universe type $\mathbf{U}$ internalizes the notion of something being a type. We will see how the identity type internalizes judgemental equality.
+
+We start by presenting the formation, introduction, elimination, and computation rules for the identity type.
+
+
+\begin{itemize}
+\item Formation rule:
+
+\begin{mathpar}
+\inferrule*[Right=$\mathbf{=}$-form]
+{\Gamma \vdash A \type \\\\
+ \Gamma \vdash a : A \\\\
+ \Gamma \vdash b : A}
+{\Gamma \vdash a \mathbf{=}_A b \type}
+\end{mathpar}
+
+\item Introduction rule:
+
+\begin{mathpar}
+\inferrule*[Right=$\mathbf{=}$-intro]
+{\Gamma \vdash a : A}
+{\Gamma \vdash r_a : a \mathbf{=}_A a}
+\end{mathpar}
+
+\item Elimination rule:
+\begin{mathpar}
+\inferrule*[Right=$\mathbf{=}$-elim]
+{\Gamma , x : A , y : A, z : x \mathbf{=}_A y \vdash D(x,y,z) \type \\\\
+\Gamma, x : A \vdash d(x) : D(x,x,r_x)}
+{\Gamma, x : A, y : A, z : x \mathbf{=}_A y \vdash \mathbf{ind}_{=}(d,x,y,z) : D(x, y, z)}
+\end{mathpar}
+
+\item Computation rule:
+
+\begin{mathpar}
+\inferrule*[Right=$\mathbf{=}$-comp]
+{\Gamma , x : A , y : A, z : x \mathbf{=}_A y \vdash D(x,y,z) \type \\\\
+\Gamma, x : A \vdash d(x) : D(x,x,r_x)}
+{\Gamma, x : A \vdash \mathbf{ind}_{=}(d,x,x,r_x) \defeq d(x) : D(x,x,r_x)}
+\end{mathpar}
+
+
+We talk about judgemental equality (e.g., $a \defeq b : A$) at a "meta" level. We can internalize this at the "type-and-term" level using identity types (e.g., $r_a : a \mathbf{=}_A b$).
+
+Note that the rules governing equality say that:
+
+If $a \defeq b : A$, then $(a \mathbf{=}_A a)  \defeq (a \mathbf{=}_A b)$, and
+
+if $r_a : a \mathbf{=}_A a$ and $(a \mathbf{=}_A a) \defeq (a \mathbf{=}_A b)$, then $r_a : a \mathbf{=}_A b$.
+
+
+So reflexivity ($r_{x}$, for a given $x$) can convert any judgemental equality into a propositional equality.
+
+\begin{ex}
+Show that $\forall n : \N, \mathbf{add}(0,n) = n$ (Note: one of $\mathbf{add}(0,n) \defeq n$ and $\mathbf{add}(n,0) \defeq n$ will hold definitionally depending on how you defined $\mathbf{add}$. Show that the other one holds judgmentally).
+\end{ex}
+
+\end{itemize}
+
+\section{The groupoidal behavior of types}
+Types can be viewed as collections of points (terms) connected by homotopies, or paths of equalities.
+We can have multiple equalities of the same type, i.e., multiple paths between the same two points (e.g., $p, p' : a \mathbf{=}_A b$).
+%Why is this "the first homotopical phenomenon"
+%Make the diagram
+%Are homotopies the paths or the relationship between two paths
+
+\begin{ex}
+    Take the inverse of an equality (if 
+    $q : b \mathbf{=}_A c$, then $q^{-1} : c \mathbf{=}_A b$).
+\end{ex}
+
+\begin{ex}
+    Take the composition of two equalities (if 
+    $p : a \mathbf{=}_A b$, and $q : b \mathbf{=}_A c$ then $p \circ q : a \mathbf{=}_A c$).
+\end{ex}
+
+\begin{ex}
+    Construct an equality of two equalities ($\alpha : p \mathbf{=}_{a \mathbf{=}_A b} p'$).
+\end{ex}
+
+\begin{ex}
+    Show that functions $A \rightarrow B$ respect equality (i.e., we should be able to map $a \mathbf{=}_A a'$ to $f(a) \mathbf{=}_A f(a')$
+\end{ex}
+
+These all describe how \textbf{homotopies} in \textbf{spaces} behave.
+
+\section{The space interpretation}
+
+\textsc{Theorem (Voevodsky):} There is an interpretation of dependent type theory into Spaces (the category of Kan compexes) in which:
+\begin{itemize}
+\item[1.] types $\rightsquigarrow$ spaces
+\item[2.] terms $\rightsquigarrow$ points
+\item[3.] equalities $\rightsquigarrow$ paths
+\end{itemize}
+
+\section{Transport}
+
+\begin{ex}
+    Show that for any dependent type $x : B \vdash E(x) \type $, any terms $b, b' : B$, and any equality $p : b \mathbf{=}_B b'$, there is a function $tr_p : E(b) \rightarrow E(b')$.
+\end{ex}
+This ensures that everything we can construct respects propositional equality. If we think of E as a predicate on B, this means that if $E(b)$ is true and $b \mathbf{=}_B b'$, then $E(b')$ is true.
+
+This is part of a more sophisticated relationship between type theory and homotopy theory (Quillen model category theory, or QMC theory). Transport says that $\pi : \Sigma_{b : B} E(b) \rightarrow B$ behaves like a fibration in a QMC.
+
+\section{Equivalence}
+For types S, T, there is a notion of equivalence $S \simeq T$. We will come back to this later, but it is similar to the notion $\Sigma_{f : S \rightarrow T}$ $\Sigma_{g : T \rightarrow S} (\Pi_{x : S} g(f (x)) = x) \times (\Pi_{y : T} f(g(y)) = y)$.
+
+\section{Characterizing equality in standard types}
+
+\begin{itemize}
+\item[\textbf{Bool}:] We can show $\mathbf{false} = \mathbf{false}$,
+$\mathbf{true} = \mathbf{true}$,
+$\mathbf{false} \neq \mathbf{true}$.
+\item[$\N$:] We can show $S n = S n \Rightarrow n = n$, $0 \neq S n$.
+\item[$\Sigma$-types:] We can show that $\forall s, t : \Sigma_{a : A} B(a)$, we have that $(s \mathbf{=}_{\Sigma_{a : A} B(a)} t) \simeq \Sigma_{p : \pi_1 s = \pi_1 t} \mathbf{tr}_p \pi_2 s = \pi_2 t$.
+\item[$\Pi$-types:] We might want that $\forall f, g : \Pi_{a : A} B(a)$, $(f = g) \simeq \Pi_{x : A} f(x) = g(x)$, but this is \textbf{functional extensionality (funext)}, and it is not provable in this system. This is validated by interpretations  in logic, sets, and spaces.
+\item[$=$-types:] We might want that $\forall p, q : a = b$, $(p = q) \simeq \mathbbm{1}$, but this is \textbf{uniqueness of identity proofs (UIP)}, which is not provable in this system. This is validated by interpretations in logic and sets. 
+\item[$U$-types:] We might want that $\forall S, T : U$, $(S = T) \simeq (S = T)$, but this is \textbf{univalence (UA)}, which is not provable in this system. This is validated by interpretation in spaces.
+\end{itemize}
+
+Implications:
+\begin{itemize}
+    \item $\mathbf{UA \implies funext}$
+    \item $\mathbf{UIP} \wedge \mathbf{funext} \nRightarrow \bot$ 
+    \item $\mathbf{UA} \wedge \mathbf{UIP} \implies \bot$
+\end{itemize}
+
+To avoid inconsistency, we cannot have both $\mathbf{UA}$ and $\mathbf{UIP}$. We choose $\mathbf{UA}$. 
+
+\section{Homotopy levels}
+%diagram
+We would like to be able to make statements like "U is not a set", but a set is something whose $\mathbf{=}$-types don't have structure. To address this, we define h-levels.
+
+
+We define the function $\mathbf{hlevel} : \N \rightarrow \type \rightarrow \type$ by the following:
+
+$\mathbf{hlevel}$ 0 T := $\Sigma_{t : T}$ $\Pi_{s : T}$ $(s \mathbf{=}_T t)$
+
+$\mathbf{hlevel}$ $S n$ T := $\Pi_{s,t : T}$ h-level $n$ $(s = t)$
+
+
+We can interpret this as follows:
+\begin{itemize}
+\item[h-level 0:] Also known as contractible, or the proposition $isContr$.
+\item[h-level 1:] Also known as propositions, or the proposition $isProp$. It is equivalent to $\Pi_{x,y:P} x = y$. %What is P
+\item[h-level 2:] Also known as sets, or the proposition $isSet$. Some sets such as $\textbf{bool}$ and $\N$ are also propositions.
+\item[h-level 3:] Also known as groupoids. Type has h-level at least 3.
+\end{itemize}
+
+\begin{ex}
+Show that $\mathbbm{1}$ is contractible.
+\end{ex}
+
+\begin{ex}
+Show that $\emptyset$, $\mathbbm{1}$ are propositions.
+\end{ex}
+
+\begin{ex}
+Show that any contractible type is a proposition.
+\end{ex}
+
+\begin{ex}
+Show that if a proposition is inhabited, then it is contractible. (This says that a proposition is always informally equivalent to $\emptyset$ or $\mathbbm{1}$, and so $\emptyset$ and $\mathbbm{1}$ behave like logical propositions where $\Sigma$ behaves like $\exists$, etc.) %I don't think this is actually what this exercise shows but I'm not sure what the correct interpretation of this comment in the notes is
+\end{ex}
+
+\begin{ex}
+Show that if a type T has h-level $n$, then it has h-level $n + 1$.
+\end{ex}
+
+\section{Equivalences}
+Sometimes we want types to be propositions, i.e., to have no structure; in other situations we may want to have the structure.
+
+Given two types $A$ and $B$ and a function $f : A \rightarrow B$, we want a \textbf{proposition} $\mathbf{isEquiv(f)}$ encapsulating the idea that f is a bijection, or "equivalence".
+
+The type $\Sigma_{g : B \rightarrow A} (f \circ g = 1_B) \times (g \circ f = 1_A)$ encapsulates this idea, but it is not a  proposition. Alternatively, we can define adjoint equivalence:
+
+
+$isEquiv(f)$ := $\Pi_{b : B} isContr(\Sigma_{a : A} f(a)=b)$
+
+The part $isContr(\Sigma_{a : A} f(a)=b)$ states that 1 is a fiber. %?
+
+\textsc{Definition.} Given two types $A$ and $B$, a function $f : A \rightarrow B$ is an \textbf{equivalence} if we have $isEquiv(f)$.
+
+We write $A \simeq B$ to denote $\Sigma_{f : A \rightarrow B} isEquiv(f)$. For every type A, we have $A \simeq B$, so we can define a function $idToEquiv: (A=B) \rightarrow (A \simeq B)$.
+
+\textsc{Definition.} The \textbf{univalence axiom} asserts that we have a term $ua$ of type $isEquiv(idToEquiv)$.
+
+\section{Univalence for logic and sets}
+
+We define $\Prop = \Sigma_{P:\type} \isProp (P)$. (Note that since $\isProp$ is a proposition, $\isProp \subseteq \type$.)
+
+Fact. The univalence axiom implies $(P =_{\Prop} Q)\simeq (P \leftrightarrow Q)$.
+
+We define $\Set = \Sigma_{S:\type} \isSet (S)$.
+
+Fact. The univalence axiom implies $(P =_{\Set} Q)\simeq (P \cong Q)$.
+
+$ \Grp = \Sigma_{G: \Set} \Sigma_{e:G} \Sigma_{m: G\to G \to G} \Sigma_{i:G\to G} \Pi_{x:G} (m(e,x)=x) \times (m(x,e)=x) \times \Pi_{x,y,z:G}((xy)z=x(yz)) \times \Pi_{x:G}(m(ix,x)=x \times (m(x,ix)=e))$
+
+Fact. The univalence axiom implies $(P =_{\Grp} Q)\simeq (P \cong Q)$.
+
 \bibliographystyle{alpha}
 \bibliography{all}
+
+\appendix
+
+\section{Solutions}
+\label{sec:exercise-solutions}
+\begin{sol}[\ref{ex:not}]
+    The function $\mathsf{not}$ has the following definitional equalities:
+    \begin{enumerate}
+        \item $\mathsf{not}~\False \defeq \True$
+        \item $\mathsf{not}~\True \defeq \False$
+    \end{enumerate}
+    Let $b : \Bool$ be given and $b : \Bool \vdash \Bool \type$ be the motive of induction.
+    By induction on $b$, it suffices to specify $\vdash \Hole{1} : \Bool$ and $\vdash \Hole{2} : \Bool$.
+    \begin{mathpar}
+        \inferrule*[right=Abs]
+        {
+            \inferrule*[Right=Bool-Elim]
+            {b : \Bool \vdash \Bool \type \\ 
+            \vdash \Hole{1} : \Bool \\ 
+            \vdash \Hole{2} : \Bool}
+            {b : \Bool \vdash \Ind_{\Bool,\Hole{1},\Hole{2}}(b) : \Bool}
+        }
+        {\vdash \lambda b : \Bool.~\Ind_{\Bool,\Hole{1},\Hole{2}}(b) : \Bool \to \Bool}
+    \end{mathpar}
+    To satisfy the first definitional equality, we choose $\Hole{1} := \True$.
+    Similarly, to satisfy the second definitional equality, we choose $\Hole{2} := \False$.
+    \begin{mathpar}
+        \inferrule*[right=Abs]
+        {
+            \inferrule*[Right=Bool-Elim]
+            {b : \Bool \vdash \Bool \type \\ 
+            \vdash \True : \Bool \\ 
+            \vdash \False : \Bool}
+            {b : \Bool \vdash \Ind_{\Bool,\True,\False}(b) : \Bool}
+        }
+        {\vdash \lambda b : \Bool.~\Ind_{\Bool,\True,\False}(b) : \Bool \to \Bool}
+    \end{mathpar}
+    \begin{warn}
+        The order of $\Hole{1}$ and $\Hole{2}$ is reversed in the Coq implementation.
+    \end{warn}
+\end{sol}
+
+\begin{sol}[\ref{ex:iota}]
+    The function $\iota$ has the following definitional equalities:
+    \begin{enumerate}
+        \item $\iota~\False \defeq 0$
+        \item $\iota~\True \defeq 1$
+    \end{enumerate}
+    Let $b : \Bool$ be given and $b : \Bool \vdash \N \type$ be the motive of induction.
+    By induction on $b$, it suffices to specify two terms, $\vdash \Hole{1} : \N$ and $\vdash \Hole{2} : \N$.
+    \begin{mathpar}
+        \inferrule*[right=Abs]
+        {
+            \inferrule*[Right=Bool-Elim]
+            {b : \Bool \vdash \N \type \\\\ \vdash \Hole{1} : \N \\ \vdash \Hole{2} : \N}
+            {b : \Bool \vdash \Ind_{\Bool,\Hole{1},\Hole{2}}(b) : \Bool}
+        }
+        {\vdash \lambda b : \Bool.~\Ind_{\Bool,\Hole{1},\Hole{2}}(b) : \Bool \to \N}
+    \end{mathpar}
+    To satisfy the definitional equalities, we choose $\Hole{1} := 0$ and $\Hole{2} := 1$.
+    \begin{mathpar}
+        \inferrule*[right=Abs]
+        {
+            \inferrule*[Right=Bool-Elim]
+            {b : \Bool \vdash \N \type \\\\ \vdash 0 : \N \\ \vdash 1 : \N}
+            {b : \Bool \vdash \Ind_{\Bool,0,1}(b) : \Bool}
+        }
+        {\vdash \lambda b : \Bool.~\Ind_{\Bool,0,1}(b) : \Bool \to \N}
+    \end{mathpar}
+    \begin{warn}
+        The order of $\Hole{1}$ and $\Hole{2}$ is reversed in the Coq implementation.
+    \end{warn}
+\end{sol}
+
+\begin{sol}[\ref{ex:add}]
+    The function $\mathsf{add}$ has the following definitional equalities:
+    \begin{enumerate}
+        \item $\mathsf{add}~n~0 \defeq n$
+        \item $\mathsf{add}~n~S(m) \defeq S(\mathsf{add}~n~m)$
+    \end{enumerate}
+    Let $n : \N$, $m : \N$ be given, and $n : \N, m : \N \vdash \N \type$ be the motive of induction.
+    By induction on $m$, it suffices to specify $n : \N \vdash \Hole{1} : \N$ and $n : \N, m : \N, h : \N \vdash \Hole{2} : \N$.
+    \begin{mathpar}
+        \inferrule*[right=Abs]
+        {
+            \inferrule*[Right=$\N$-Elim]
+            {n : \N, m : \N \vdash \N \type \\\\ 
+             n : \N \vdash \Hole{1} : \N \\\\ 
+             n : \N, m : \N, h : \N \vdash \Hole{2} : \N}
+            {n : \N, m : \N \vdash \Ind_{\N,\Hole{1},\Hole{2}}(m) : \N}
+        }
+        {\vdash \lambda n : \N.~\lambda m : \N.~\Ind_{\N,\Hole{1},\Hole{2}}(m) : \N \to \N \to \N}
+    \end{mathpar}
+    To satisfy the first definitional equality, choose $\Hole{1} := n$.
+    To satisfy the second definitional equality, choose $\Hole{2} := S(h)$
+    \begin{mathpar}
+        \inferrule*[right=Abs]
+        {
+            \inferrule*[Right=$\N$-Elim]
+            {n : \N, m : \N \vdash \N \type \\\\ 
+             n : \N \vdash n : \N \\\\ 
+             n : \N, m : \N, h : \N \vdash S(h) : \N}
+            {n : \N, m : \N \vdash \Ind_{\N,n,S(h)}(m) : \N}
+        }
+        {\vdash \lambda n : \N.~\lambda m : \N.~\Ind_{\N,n,S(h)}(m) : \N \to \N \to \N}
+    \end{mathpar}
+\end{sol}
+
+\begin{sol}[\ref{ex:mult}]
+    The function $\mathsf{mult}$ has the following definitional equalities:
+    \begin{enumerate}
+        \item $\mathsf{mult}~n~0 \defeq 0$
+        \item $\mathsf{mult}~n~S(m) \defeq \mathsf{add}~n~(\mathsf{mult}~n~m)$
+    \end{enumerate}
+    Let $n : \N$, $m : \N$ be given, and $n : \N, m : \N \vdash \N \type$ be the motive of induction.
+    By induction on $m$, it suffices to specify $n : \N \vdash \Hole{1} : \N$ and $n : \N, m : \N, h : \N \vdash \Hole{2} : \N$.
+    \begin{mathpar}
+        \inferrule*[right=Abs]
+        {
+            \inferrule*[Right=$\N$-Elim]
+            {n : \N, m : \N \vdash \N \type \\\\ 
+             n : \N \vdash \Hole{1} : \N \\\\ 
+             n : \N, m : \N, h : \N \vdash \Hole{2} : \N}
+            {n : \N, m : \N \vdash \Ind_{\N,\Hole{1},\Hole{2}}(m) : \N}
+        }
+        {\vdash \lambda n : \N.~\lambda m : \N.~\Ind_{\N,\Hole{1},\Hole{2}}(m) : \N \to \N \to \N}
+    \end{mathpar}
+    To satisfy the first definitional equality, choose $\Hole{1} := 0$.
+    To satisfy the second definitional equality, choose $\Hole{2} := \mathsf{add}~n~h$.
+    \begin{mathpar}
+        \inferrule*[right=Abs]
+        {
+            \inferrule*[Right=$\N$-Elim]
+            {n : \N, m : \N \vdash \N \type \\\\ 
+             n : \N \vdash 0 : \N \\\\ 
+             n : \N, m : \N, h : \N \vdash \mathsf{add}~n~h : \N}
+            {n : \N, m : \N \vdash \Ind_{\N,0,\mathsf{add}~n~h}(m) : \N}
+        }
+        {\vdash \lambda n : \N.~\lambda m : \N.~\Ind_{\N,0,\mathsf{add}~n~h}(m) : \N \to \N \to \N}
+    \end{mathpar}
+\end{sol}
 \end{document}

@@ -1,0 +1,17 @@
+\begin{tikzpicture}
+    \node (0) at (0,0) {$x : B \vdash E(x) \type$};
+    \node (1) at (-4.5,-3) {$x : B, y : E(x) \ctx$};
+    \node (2) at (4.5, -3) {$\vdash \Sigma_{x : B}E(x) \type$};
+    \path[->] 
+    (0) 
+    edge 
+    node[sloped, anchor=center, above] {Context extension} (1);
+    \path[->] 
+    (0) 
+    edge 
+    node[sloped, anchor=center, above, text width=2cm] {$\Sigma$ formation} (2);
+    \path[->] 
+    (1) 
+    edge[thick, dotted]
+    node[sloped, anchor=center, above, text width=1.5cm] {Internalization} (2);
+\end{tikzpicture}
