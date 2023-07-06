@@ -1,0 +1,29 @@
+\begin{tikzpicture}
+\node at (4,0) {$B$};
+\node at (5,5) {$\Sigma_{x : B}E(x)$};
+
+\node at (-2,0) {$a$};
+\draw[black,fill=black] (-1.5,0) circle (.5ex);
+
+\node at (2.5,0) {$b$};
+\draw[black,fill=black] (2,0) circle (.5ex);
+
+\draw (0,5) ellipse (4cm and 1.3cm);
+\draw (0,0) ellipse (3cm and 1cm);
+
+\path[draw, snake it] (-1.5,0) -- (2,0);
+
+\node at (0, 0.5) {$p$};
+
+\node at (-2,5) {$f(a)$};
+\draw[black,fill=black] (-1.5,5) circle (.5ex);
+
+\node at (2.5,5) {$f(b)$};
+\draw[black,fill=black] (2,5) circle (.5ex);
+
+\path[draw, snake it] (-1.5,5) -- (2,5);
+\node at (0, 5.5) {$\mathsf{ap}_{f}~p$};
+
+\node at (0.4,2.2) {$\pi_{1}$};
+\draw[->] (0,3) -- (0,1.5);
+\end{tikzpicture}

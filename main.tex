@@ -14,9 +14,12 @@
 \usepackage{mathpartir}
 \usepackage{quiver}
 \usepackage{multicol}
+\usepackage{amsmath}
 \usepackage{pifont}
 \newcommand{\cmark}{\ding{51}}%
 \newcommand{\xmark}{\ding{55}}
+
+\tikzset{snake it/.style={decorate, decoration=snake}}
 
 \usepackage{minted}
 \usemintedstyle{tango}
@@ -26,6 +29,7 @@
 \newtheorem{ex}{Exercise}[section]
 \newtheorem*{sol}{Solution}
 \newtheorem*{warn}{Warning}
+\newtheorem*{fact}{Fact}
 
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.12}
@@ -43,13 +47,17 @@ Introduction to HoTT Notes}
 \newcommand{\R}{\mathbbm{R}}
 \newcommand{\ctx}{\ensuremath{\mathsf{~ctx}}}
 \newcommand{\type}{\ensuremath{\mathsf{~type}}}
-\newcommand{\defeq}{\ensuremath{\overset{\cdot}{=}}}
+\newcommand{\defeq}{\ensuremath{\overset{\boldsymbol{\cdot}}{=}}}
 \newcommand{\Unit}{\ensuremath{\mathsf{1}}}
 \newcommand{\Bool}{\ensuremath{\mathsf{Bool}}}
 \newcommand{\Prop}{\ensuremath{\mathsf{Prop}}}
 \newcommand{\isProp}{\ensuremath{\mathsf{isProp}}}
 \newcommand{\Set}{\ensuremath{\mathsf{Set}}}
 \newcommand{\isSet}{\ensuremath{\mathsf{isSet}}}
+\newcommand{\isContr}{\ensuremath{\mathsf{isContr}}}
+\newcommand{\hLevel}[2]{\ensuremath{\mathsf{hLevel}~#1~#2}}
+\newcommand{\isEquiv}{\ensuremath{\mathsf{isEquiv}}}
+\newcommand{\idToEquiv}{\ensuremath{\mathsf{idToEquiv}}}
 \newcommand{\Grp}{\ensuremath{\mathsf{Grp}}}
 \newcommand{\W}{\ensuremath{\mathsf{W}}}
 \newcommand{\U}{\ensuremath{\mathcal{U}}}
@@ -57,6 +65,7 @@ Introduction to HoTT Notes}
 \newcommand{\False}{\ensuremath{\mathsf{false}}}
 \newcommand{\Ind}{\ensuremath{\mathsf{ind}}}
 \newcommand{\Hole}[1]{\fbox{?#1}}
+\renewcommand{\emph}{\textbf}
 
 \newcommand{\newcommenter}[3]{%
   \newcommand{#1}[1]{%
@@ -127,13 +136,16 @@ And the last judgment expresses that two terms, $t$ and $t'$, of type $\tau$ und
 \item Unit type $\Unit$.
 \item The type of Boolean $\Bool$.
 \item The type of natural numbers $\N$.
-\item The types of well-founded trees $\W$.
 \item The types of equalities $=$.
 \item Dependent product types $\Sigma$.
 \item Dependent function types $\Pi$.
 \item Universes $\U_{i}$.
 \end{enumerate}
 \end{multicols}
+\vspace{-\baselineskip}
+\begin{enumerate}
+    \item[(5)] The types of well-founded trees $\W$. 
+\end{enumerate}
 \end{eg}
 
 MLTT can be extended with additional features.
@@ -290,7 +302,7 @@ we want to form a type whose terms are dependent pairs $\langle b, e \rangle$ wh
 
 \begin{mathpar}
 \inferrule*[Right=$\Sigma$-Form]
-{\Gamma, x : B \vdash E(x) \type}
+{\Gamma, b : B \vdash E(b) \type}
 {\Gamma \vdash \Sigma_{x : B} E(x) \type}
 \end{mathpar}
 
@@ -321,7 +333,7 @@ we want to form a type whose terms are dependent pairs $\langle b, e \rangle$ wh
 \end{mathpar}
 \end{itemize}
 
-We can think of $\Sigma_{x : B}E(x)$ as the disjoint union of sets indexed by elements of $B$.
+We can think of $\Sigma_{x : B}E(x)$ as the disjoint union of sets indexed by the elements of $B$.
 See Figure \ref{fig:sigma-type-as-total-space}.
 \begin{figure}[h]
     \centering
@@ -337,6 +349,51 @@ Construct a function $\pi_1 : \Sigma_{x : B} E(x) \to B$.
 \begin{ex}
 Construct a function $\pi_2 : \Pi_{s : \Sigma_{x : B} E(x)} E(\pi_1 s)$. This is a dependently typed function that takes a term $s : \Sigma_{x : B} E(x)$ and returns something of type $E(\pi_1 s)$.
 \end{ex}
+
+\section{Digression: Pi Types}
+Pi-types can be thought of as dependent function types. Note that they are \textbf{not} an inductive type, but we include a sketch of the rules for them here for clarity.
+
+\begin{itemize}
+\item Formation rule:
+
+\begin{mathpar}
+\inferrule*[Right=$\Pi$-Form]
+{\Gamma, b : B \vdash E(b) \type}
+{\Gamma \vdash \Pi{x : B} E(x) \type}
+\end{mathpar}
+
+\item Introduction rule:
+
+\begin{mathpar}
+\inferrule*[Right=$\Pi$-Intro]
+{\Gamma, b : B \vdash e : E(b)}
+{\Gamma \vdash \lambda b . e : \Pi{x : B} E(x)}
+\end{mathpar}
+
+
+\item Elimination rule:
+\begin{mathpar}
+\inferrule*[Right=$\Pi$-Elim]
+{\Gamma \vdash f : \Pi{x : B} E(x) \\\\ \Gamma \vdash b : B}
+{\Gamma \vdash f b : E(b)}
+\end{mathpar}
+
+\item $\beta$-equality
+
+\begin{mathpar}
+\inferrule*[Right=$\beta$-Eq]
+{\Gamma , x : B \vdash e : E(x) \\\\ \Gamma \vdash b : B}
+{\Gamma \vdash (\lambda x . e) b \defeq e[\sfrac{b}{x}] : E(b)}
+\end{mathpar}
+
+\item $\eta$-equality
+
+\begin{mathpar}
+\inferrule*[Right=$\eta$-Eq]
+{\Gamma \vdash f : \Pi_{x : B} E(x)}
+{\Gamma \vdash \lambda x . f x \defeq f : \Pi_{x : B} E(x)}
+\end{mathpar}
+\end{itemize}
 
 \section{Types as logic, sets, and programs}
 This section compares previously presented terms in light of the Curry-Howard correspondence, which relates logic to programs, and the Brouwer–Heyting–Kolmogorov interpretation, which provides an explanation of constructive logic. 
@@ -365,6 +422,14 @@ Table \ref{tb:types-as-logic-sets-programs} summarizes the interpretation of typ
 \end{eg}
 
 \section{Identity Type}
+\label{sec:identity}
+Observe that $\mathsf{add}~0~m \defeq m : \N$ doesn't hold judgmentally because we don't know whether $m$ is 0 or is the successor of some natural number.
+To ``prove" this equality, we need to use the elimination rule for $\N$.
+However, since $\defeq$ is not a type, it does not make sense to make the judgment $\vdash t : \mathsf{add}~0~m \defeq 0$.
+We can internalize the existing notion of equalities, namely judgmental equalities ($\defeq$).
+This yields the identity types, giving us another notion of equalities, \emph{propositional equalities}.
+
+Type formers often internalize existing concepts, i.e., turn them into types. For example, $\Bool$, $\N$, $\varnothing$, $\mathbbm{1}$, internalize existing notions of those things; $\Sigma$-types internalize context extensions (Figure \ref{fig:internalize}); $\Pi$-types internalize dependent types; and the universe type $\U$ internalizes the notion of something being a type. We will see how the identity type internalizes judgmental equality.
 
 \begin{figure}[h]
     \centering
@@ -373,171 +438,233 @@ Table \ref{tb:types-as-logic-sets-programs} summarizes the interpretation of typ
     \label{fig:internalize}
 \end{figure}
 
-$\mathbf{Id}$ is a strange inductive type. Why do we need it?
-
-Answer 1: There are many equalities that hold only propositionally.
-
-Example:
-
-We have that $\mathbf{add} (x, 0) \defeq x$ and
-$\mathbf{add} (x, s y) \defeq s (\mathbf{add}(x,y))$, but
-$\mathbf{add}(0,x) \defeq x$ is not provable.
-
-Answer 2: We already have a notion of equality: \textbf{judgemental equality} ($\defeq$). The identity type gives us another notion, \textbf{propositional equality}. The logical interpretation of this is that if, under the Curry-Howard correspondence, propositions are types and proofs are terms, then in order to prove an equality that is not provable judgmentally, we want to produce a term of a type of equalities.
-
-Type formers often internalize existing concepts, i.e., turn them into types. For example, $\mathbf{bool}$, $\N$, $\emptyset$, $\mathbbm{1}$, internalize existing notions of those things; $\Sigma$ internalizes context extension; $\Pi$ internalizes dependent types; and the universe type $\mathbf{U}$ internalizes the notion of something being a type. We will see how the identity type internalizes judgemental equality.
-
 We start by presenting the formation, introduction, elimination, and computation rules for the identity type.
-
 
 \begin{itemize}
 \item Formation rule:
 
 \begin{mathpar}
-\inferrule*[Right=$\mathbf{=}$-form]
+\inferrule*[Right=$\mathrm{=}$-Form]
 {\Gamma \vdash A \type \\\\
- \Gamma \vdash a : A \\\\
+ \Gamma \vdash a : A \\
  \Gamma \vdash b : A}
-{\Gamma \vdash a \mathbf{=}_A b \type}
+{\Gamma \vdash a =_{A} b \type}
 \end{mathpar}
 
 \item Introduction rule:
 
 \begin{mathpar}
-\inferrule*[Right=$\mathbf{=}$-intro]
+\inferrule*[Right=$\mathrm{=}$-Intro]
 {\Gamma \vdash a : A}
-{\Gamma \vdash r_a : a \mathbf{=}_A a}
+{\Gamma \vdash r_{a} : a =_{A} a}
 \end{mathpar}
 
 \item Elimination rule:
 \begin{mathpar}
-\inferrule*[Right=$\mathbf{=}$-elim]
-{\Gamma , x : A , y : A, z : x \mathbf{=}_A y \vdash D(x,y,z) \type \\\\
+\inferrule*[Right=$\mathrm{=}$-Elim]
+{\Gamma , x : A , y : A, z : x =_A y \vdash D(x,y,z) \type \\\\
 \Gamma, x : A \vdash d(x) : D(x,x,r_x)}
-{\Gamma, x : A, y : A, z : x \mathbf{=}_A y \vdash \mathbf{ind}_{=}(d,x,y,z) : D(x, y, z)}
+{\Gamma, x : A, y : A, z : x =_A y \vdash \Ind_{=}(d,x,y,z) : D(x, y, z)}
 \end{mathpar}
 
 \item Computation rule:
 
 \begin{mathpar}
-\inferrule*[Right=$\mathbf{=}$-comp]
-{\Gamma , x : A , y : A, z : x \mathbf{=}_A y \vdash D(x,y,z) \type \\\\
+\inferrule*[Right=$\mathrm{=}$-Comp]
+{\Gamma , x : A , y : A, z : x =_A y \vdash D(x,y,z) \type \\\\
 \Gamma, x : A \vdash d(x) : D(x,x,r_x)}
-{\Gamma, x : A \vdash \mathbf{ind}_{=}(d,x,x,r_x) \defeq d(x) : D(x,x,r_x)}
+{\Gamma, x : A \vdash \Ind_{=}(d,x,x,r_x) \defeq d(x) : D(x,x,r_x)}
+\end{mathpar}
+\end{itemize}
+
+
+We talk about judgemental equalities (e.g., $a \defeq b : A$) at a ``meta" level.
+The identity types (e.g., $r_a : a =_{A} b$) internalize these into the ``type-and-term" level.
+
+The congruence rules for judgmental equalities say that
+\begin{mathpar}
+    \inferrule*
+    {a : A, b : A \vdash a \defeq b : A \\ a : A \vdash a =_{A} a \type}
+    {a : A, b : A \vdash (a =_{A} a) \defeq (a =_{A} b) \type}
+\end{mathpar}
+and that
+\begin{mathpar}
+    \inferrule*
+    {a : A \vdash r_{a} : a =_{A} a \\ a : A, b : A \vdash (a =_{A} a) \defeq (a =_{A} b) \type}
+    {a : A, b : A \vdash r_{a} : a =_{A} b}
+\end{mathpar}
+Thus, judgmentally equal terms are propositionally equal by reflexivity.
+
+\begin{ex}
+Show that $\mathsf{add}~0~n = n$ for all $n : \N$.
+In other words, find a term that inhabits the type
+\[
+\prod_{n : \N} \mathsf{add}~0~n = n
+\]
+(Note: one of $\mathsf{add}~0~n) \defeq n$ and $\mathsf{add}~n~0 \defeq n$ will hold definitionally depending on how you defined $\mathsf{add}$.
+Show that the other one holds judgmentally).
+\end{ex}
+
+\section{The Groupoidal Behavior of Types and the Space Interpretation}
+The identity type is reflexive, symmetric, and transitive. Reflexivity comes by construction; for the other two, see Exercises \ref{ex:id-symmetry} and \ref{ex:id-transitivity}.
+An identity type can also have multiple inhabitants, i.e., we can have $p, q : a =_A b$.
+Since $p$ and $q$ are themselves terms, the equality formation rule allows us to form a new type.
+\begin{mathpar}
+    \inferrule*
+    {\vdash p : a =_{A} b \\ \vdash q : a =_{A} b}
+    {\vdash p =_{a =_{A} b} q \type}
 \end{mathpar}
 
+A type $A$ can be interpreted as a space, and inhabitants $p$ and $q$ of the identity type $a =_{A} b$ can be interpreted as two parallel \emph{paths} from $a$ to $b$ in the space $A$.
+The inhabitants of the type $p =_{a =_{A} b} q$ can then be interpreted as \emph{2-dimensional} paths, or \emph{homotopies}, between the two 1-dimensional paths $p$ and $q$.
+Similarly, we can form the type $r =_{p =_{(a =_{A} b)} q} s$ of 3-dimensional paths between two parallel 2-dimensional paths.
+This process can be repeated ad infinitum, giving higher dimensional structures.
+See Figure \ref{fig:n-paths}.
 
-We talk about judgemental equality (e.g., $a \defeq b : A$) at a "meta" level. We can internalize this at the "type-and-term" level using identity types (e.g., $r_a : a \mathbf{=}_A b$).
+\begin{figure}[h]
+    \centering
+    \input{n-paths}
+    \caption{An illustration of higher dimensional paths.}
+    \label{fig:n-paths}
+\end{figure}
 
-Note that the rules governing equality say that:
-
-If $a \defeq b : A$, then $(a \mathbf{=}_A a)  \defeq (a \mathbf{=}_A b)$, and
-
-if $r_a : a \mathbf{=}_A a$ and $(a \mathbf{=}_A a) \defeq (a \mathbf{=}_A b)$, then $r_a : a \mathbf{=}_A b$.
-
-
-So reflexivity ($r_{x}$, for a given $x$) can convert any judgemental equality into a propositional equality.
-
-\begin{ex}
-Show that $\forall n : \N, \mathbf{add}(0,n) = n$ (Note: one of $\mathbf{add}(0,n) \defeq n$ and $\mathbf{add}(n,0) \defeq n$ will hold definitionally depending on how you defined $\mathbf{add}$. Show that the other one holds judgmentally).
-\end{ex}
-
-\end{itemize}
-
-\section{The groupoidal behavior of types}
-Types can be viewed as collections of points (terms) connected by homotopies, or paths of equalities.
-We can have multiple equalities of the same type, i.e., multiple paths between the same two points (e.g., $p, p' : a \mathbf{=}_A b$).
 %Why is this "the first homotopical phenomenon"
 %Make the diagram
-%Are homotopies the paths or the relationship between two paths
+
+\begin{ex}[Symmetry]\label{ex:id-symmetry}
+    Define a function that produces the inverse of a path.
+    \[
+        (-)^{-1} : (a = b) \to (b = a)
+    \]
+\end{ex}
+
+\begin{ex}[Transitivity]\label{ex:id-transitivity}
+    Define a function that produces the composition of two paths.
+    \[
+        - \cdot - : (a = b) \to (b = c) \to (a = c)
+    \]
+\end{ex}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|}\hline
+        Equality & Homotopy \\\hline
+        reflexivity & constant path \\\hline
+        symmetry & inverse path \\\hline
+        transitivity & path concatenation \\\hline
+    \end{tabular}
+    \caption{Exercises \ref{ex:id-symmetry} and \ref{ex:id-transitivity} reveal the connections between identity types and homotopies.}
+    \label{tab:equalities-and-homotopy}
+\end{table}
 
 \begin{ex}
-    Take the inverse of an equality (if 
-    $q : b \mathbf{=}_A c$, then $q^{-1} : c \mathbf{=}_A b$).
+    Give an example of two equalities in some type that are equal to each other in the relevant identity type and prove that they are equal, i.e., pick a specific type $A$ and two terms $a$ and $b$, construct two distinct terms $p, p' : a =_A b$, and prove $\alpha : p \mathbf{=}_{a =_A b} p'$.
 \end{ex}
 
 \begin{ex}
-    Take the composition of two equalities (if 
-    $p : a \mathbf{=}_A b$, and $q : b \mathbf{=}_A c$ then $p \circ q : a \mathbf{=}_A c$).
+    Show that functions $f : A \to B$ respect equalities.
+    In other words, construct the following function:
+    \[
+        \mathsf{ap}_{f} : (a =_{A} b) \to (f(a) =_{B} f(b))
+    \]
+    The notation $\mathsf{ap}_{f}$ can be read as the \underline{a}ction on \underline{p}aths of $f$ \cite{hottbook}.
 \end{ex}
 
-\begin{ex}
-    Construct an equality of two equalities ($\alpha : p \mathbf{=}_{a \mathbf{=}_A b} p'$).
+%\begin{figure}[h]
+%    \centering
+%    \input{ap}
+%    \caption{Caption}
+%    \label{fig:ap}
+%\end{figure}
+
+Veovosky showed that MLTT can be interpreted in a category of spaces (the category of Kan complexes).
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|}\hline
+        MLTT & Space\\\hline
+        types $T$ & spaces $T$\\\hline
+        terms $t$ & points $t \in T$\\\hline
+        dependent types $x : B \vdash E(x) \type$ & fibrations 
+            $\begin{array}{c}
+            E\\
+            \downarrow\\
+            B
+            \end{array}$\\\hline
+        equalities & paths/homotopies\\\hline
+    \end{tabular}
+    \caption{The space interpretation of MLTT.}
+    \label{tab:the-space-interpretation-of-mltt}
+\end{table}
+
+\begin{ex}[Transport]
+    Show that for any dependent type $x : B \vdash E(x) \type $, any terms $b, b' : B$, and any path $p : b =_B b'$, there is a function $p_{*} : E(b) \to E(b')$.
 \end{ex}
+This ensures that every dependent type we can construct respects propositional equality. 
+If we think of $E$ as a predicate on $B$, this means that if $E(b)$ is true and $b =_B b'$, then $E(b')$ is true.
+This is known as the \emph{indiscernibility of identicals}.
 
-\begin{ex}
-    Show that functions $A \rightarrow B$ respect equality (i.e., we should be able to map $a \mathbf{=}_A a'$ to $f(a) \mathbf{=}_A f(a')$
-\end{ex}
-
-These all describe how \textbf{homotopies} in \textbf{spaces} behave.
-
-\section{The space interpretation}
-
-\textsc{Theorem (Voevodsky):} There is an interpretation of dependent type theory into Spaces (the category of Kan compexes) in which:
-\begin{itemize}
-\item[1.] types $\rightsquigarrow$ spaces
-\item[2.] terms $\rightsquigarrow$ points
-\item[3.] equalities $\rightsquigarrow$ paths
-\end{itemize}
-
-\section{Transport}
-
-\begin{ex}
-    Show that for any dependent type $x : B \vdash E(x) \type $, any terms $b, b' : B$, and any equality $p : b \mathbf{=}_B b'$, there is a function $tr_p : E(b) \rightarrow E(b')$.
-\end{ex}
-This ensures that everything we can construct respects propositional equality. If we think of E as a predicate on B, this means that if $E(b)$ is true and $b \mathbf{=}_B b'$, then $E(b')$ is true.
-
-This is part of a more sophisticated relationship between type theory and homotopy theory (Quillen model category theory, or QMC theory). Transport says that $\pi : \Sigma_{b : B} E(b) \rightarrow B$ behaves like a fibration in a QMC.
+This is part of a more sophisticated relationship between type theory and homotopy theory (Quillen model category theory, or QMC theory). 
+Transport says that $\pi_{1} : \Sigma_{b : B} E(b) \rightarrow B$ behaves like a fibration in a QMC. For more information, see Appendix $\ref{sec:transport-explanation}$.
 
 \section{Equivalence}
-For types S, T, there is a notion of equivalence $S \simeq T$. We will come back to this later, but it is similar to the notion $\Sigma_{f : S \rightarrow T}$ $\Sigma_{g : T \rightarrow S} (\Pi_{x : S} g(f (x)) = x) \times (\Pi_{y : T} f(g(y)) = y)$.
+For types $S, T$, there is a notion of equivalence $S \simeq T$. We will come back to this later, but it is similar to the notion $\Sigma_{f : S \rightarrow T}$ $\Sigma_{g : T \rightarrow S} (\Pi_{x : S} g(f (x)) = x) \times (\Pi_{y : T} f(g(y)) = y)$. (This is informally similar to idea of there being an isomorphism $f$ between $S$ and $T$, with inverse $g$.)
 
-\section{Characterizing equality in standard types}
+\section{Characterizing Equality in Standard Types}
 
 \begin{itemize}
-\item[\textbf{Bool}:] We can show $\mathbf{false} = \mathbf{false}$,
-$\mathbf{true} = \mathbf{true}$,
-$\mathbf{false} \neq \mathbf{true}$.
-\item[$\N$:] We can show $S n = S n \Rightarrow n = n$, $0 \neq S n$.
-\item[$\Sigma$-types:] We can show that $\forall s, t : \Sigma_{a : A} B(a)$, we have that $(s \mathbf{=}_{\Sigma_{a : A} B(a)} t) \simeq \Sigma_{p : \pi_1 s = \pi_1 t} \mathbf{tr}_p \pi_2 s = \pi_2 t$.
-\item[$\Pi$-types:] We might want that $\forall f, g : \Pi_{a : A} B(a)$, $(f = g) \simeq \Pi_{x : A} f(x) = g(x)$, but this is \textbf{functional extensionality (funext)}, and it is not provable in this system. This is validated by interpretations  in logic, sets, and spaces.
-\item[$=$-types:] We might want that $\forall p, q : a = b$, $(p = q) \simeq \mathbbm{1}$, but this is \textbf{uniqueness of identity proofs (UIP)}, which is not provable in this system. This is validated by interpretations in logic and sets. 
-\item[$U$-types:] We might want that $\forall S, T : U$, $(S = T) \simeq (S = T)$, but this is \textbf{univalence (UA)}, which is not provable in this system. This is validated by interpretation in spaces.
+\item[\Bool:] We can show $\False = \False$,
+$\True = \True$,
+$\False \neq \True$. (Note that $\False \neq \True$ means that there is a function $\False \neq \True$ defined as $(\False = \True)\to \emptyset$. More generally, $\neg P$ is defined as $P\to\emptyset$.)
+\item[$\N$:] We can show $S n = S m \Rightarrow n = m$ and $0 \neq S n$.
+\item[$\Sigma$-types:] We can show that for all $s, t : \Sigma_{a : A} B(a)$, we have $(s \mathbf{=}_{\Sigma_{a : A} B(a)} t) \simeq \Sigma_{p : \pi_1 s = \pi_1 t} \mathbf{tr}_p \pi_2 s = \pi_2 t$.
+\item[$\Pi$-types:] \textsc{(functional extensionality)} We might want that $\forall f, g : \Pi_{a : A} B(a)$, $(f = g) \simeq \Pi_{x : A} f(x) = g(x)$, but this is functional extensionality ($\mathbf{funext}$), and it is \textbf{not provable} in MLTT. This is validated by interpretations  in logic, sets, and spaces (i.e., functional extentionality is true in all of those systems).
+\item[$=$-types:] \textsc{(uniqueness of identity proofs)} We might want that $\forall p, q : a = b$, $(p = q) \simeq \mathbbm{1}$, but this is uniqueness of identity proofs (UIP), which is \textbf{not provable} in MLTT. This is validated by interpretations in logic and sets, but not in spaces. 
+\item[$U$-types:] \textsc{(univalence)} We might want that $\forall S, T : U$, $(S = T) \simeq (S \simeq T)$, but this is univalence ($\mathbf{UA}$), which is \textbf{not provable} in MLTT. This is validated by interpretation in \textbf{spaces}.
 \end{itemize}
 
-Implications:
-\begin{itemize}
-    \item $\mathbf{UA \implies funext}$
-    \item $\mathbf{UIP} \wedge \mathbf{funext} \nRightarrow \bot$ 
-    \item $\mathbf{UA} \wedge \mathbf{UIP} \implies \bot$
-\end{itemize}
+\begin{figure}[h]
+    \centering
+    \input{ua-uip-funext}
+    \caption{Both UA and UIP with equality reflection (ER) imply functional extensionality.
+    However, UA and UIP are incompatible.}
+    \label{fig:ua-uip-funext}
+\end{figure}
 
-To avoid inconsistency, we cannot have both $\mathbf{UA}$ and $\mathbf{UIP}$. We choose $\mathbf{UA}$. 
+To avoid inconsistency, we cannot have both $\mathbf{UA}$ and $\mathbf{UIP}$. We choose $\mathbf{UA}$ (and so also get $\mathbf{funext}$). 
+Both choices make sense, but choosing $\mathbf{UIP}$ would send us in the direction of set theory, not HoTT.
 
-\section{Homotopy levels}
-%diagram
-We would like to be able to make statements like "U is not a set", but a set is something whose $\mathbf{=}$-types don't have structure. To address this, we define h-levels.
+\section{Homotopy Levels}
+In this section, we introduce \emph{homotopy levels}, or h-levels for short, which are defined recursively as follows:
+\begin{align*}
+    \mathsf{hLevel}~0~T &:= \sum_{t : T}\prod_{s : T}(s =_T t)\\
+    \mathsf{hLevel}~S(n)~T &:= \prod_{s,t : T}\mathsf{hLevel}~n~(s = t)
+\end{align*}
 
-
-We define the function $\mathbf{hlevel} : \N \rightarrow \type \rightarrow \type$ by the following:
-
-$\mathbf{hlevel}$ 0 T := $\Sigma_{t : T}$ $\Pi_{s : T}$ $(s \mathbf{=}_T t)$
-
-$\mathbf{hlevel}$ $S n$ T := $\Pi_{s,t : T}$ h-level $n$ $(s = t)$
-
-
-We can interpret this as follows:
-\begin{itemize}
-\item[h-level 0:] Also known as contractible, or the proposition $isContr$.
-\item[h-level 1:] Also known as propositions, or the proposition $isProp$. It is equivalent to $\Pi_{x,y:P} x = y$. %What is P
-\item[h-level 2:] Also known as sets, or the proposition $isSet$. Some sets such as $\textbf{bool}$ and $\N$ are also propositions.
-\item[h-level 3:] Also known as groupoids. Type has h-level at least 3.
-\end{itemize}
-
+\subsection{h-level 0}\label{sec:h-level-0}
+A type $T$ is \emph{contractible} (has h-level 0) if there is a \emph{center of contraction} $t$, and for every element $s$ of that type, there is a path from $s$ to $t$.
+\[
+    \isContr(T) := \sum_{t : T}\prod_{s : T} (s = t)
+\]
 \begin{ex}
 Show that $\mathbbm{1}$ is contractible.
 \end{ex}
 
+\begin{ex}
+Show that if $T$ is contractible and inhabited, then $T \simeq \mathbbm{1}$.
+\end{ex}
+
+%\begin{figure}[h]
+%    \centering
+%    \input{h-level0}
+%    \caption{Caption}
+%    \label{fig:h-level0}
+%\end{figure}
+
+\subsection{h-level 1}\label{sec:h-level-1}
+A type $T$ is a \emph{proposition} if it has h-level 1.
+\[
+    \hLevel{1}{T} := \prod_{s,t : T}\sum_{q : s = t}\prod_{p : s = t}(p = q)
+\]
 \begin{ex}
 Show that $\emptyset$, $\mathbbm{1}$ are propositions.
 \end{ex}
@@ -547,49 +674,109 @@ Show that any contractible type is a proposition.
 \end{ex}
 
 \begin{ex}
-Show that if a proposition is inhabited, then it is contractible. (This says that a proposition is always informally equivalent to $\emptyset$ or $\mathbbm{1}$, and so $\emptyset$ and $\mathbbm{1}$ behave like logical propositions where $\Sigma$ behaves like $\exists$, etc.) %I don't think this is actually what this exercise shows but I'm not sure what the correct interpretation of this comment in the notes is
+Show that if a proposition is inhabited, then it is contractible. (This says that a proposition is always informally equivalent to $\emptyset$ or $\mathbbm{1}$, i.e., truth values) %I don't think this is actually what this exercise shows but I'm not sure what the correct interpretation of this comment in the notes is
 \end{ex}
 
+\subsection{h-level 2}\label{sec:h-level-2}
+A type $T$ is a \emph{set} if it has h-level 2, i.e., when the equalities are propositions.
+\[
+    \hLevel{2}{T} := \prod_{s,t : T}\prod_{p,q : s = t}\sum_{u : p = q}\prod_{v : p = q}(v = u)
+\]
+$\N$ and $\Bool$ are sets.
+\subsection{h-level 3}\label{sec:h-level-3}
+A type $T$ is a \emph{groupoid} when it has h-level 3, i.e., when the homotopies are propositions.
+\[
+    \hLevel{3}{T} := \prod_{s,t : T}\prod_{p,q : s = t}\prod_{u,v : p = q}\sum_{w : u = v}\prod_{x : u = v}(x = w)
+\]
+A universe $\U$ has h-level at least 3.
+
 \begin{ex}
-Show that if a type T has h-level $n$, then it has h-level $n + 1$.
+Show that if a type $T$ has h-level $n$, then it has h-level $n + 1$.
 \end{ex}
 
 \section{Equivalences}
-Sometimes we want types to be propositions, i.e., to have no structure; in other situations we may want to have the structure.
+Sometimes we want types to be propositions, i.e., to have no structure. In other situations we may want to have the structure.
 
-Given two types $A$ and $B$ and a function $f : A \rightarrow B$, we want a \textbf{proposition} $\mathbf{isEquiv(f)}$ encapsulating the idea that f is a bijection, or "equivalence".
+Given two types $A$ and $B$ and a function $f : A \rightarrow B$, we want a \textbf{proposition} $\isEquiv(f)$ encapsulating the idea that $f$ is a bijection, or ``equivalence''.
 
 The type $\Sigma_{g : B \rightarrow A} (f \circ g = 1_B) \times (g \circ f = 1_A)$ encapsulates this idea, but it is not a  proposition. Alternatively, we can define adjoint equivalence:
 
+\begin{align*}
+\isEquiv(f) &:= \Pi_{b : B} \isContr(\Sigma_{a : A} f(a)=b)
+\end{align*}
 
-$isEquiv(f)$ := $\Pi_{b : B} isContr(\Sigma_{a : A} f(a)=b)$
 
-The part $isContr(\Sigma_{a : A} f(a)=b)$ states that 1 is a fiber. %?
 
-\textsc{Definition.} Given two types $A$ and $B$, a function $f : A \rightarrow B$ is an \textbf{equivalence} if we have $isEquiv(f)$.
+The part $\isContr(\Sigma_{a : A} f(a)=b)$ states that 1 is a fiber. %?
 
-We write $A \simeq B$ to denote $\Sigma_{f : A \rightarrow B} isEquiv(f)$. For every type A, we have $A \simeq B$, so we can define a function $idToEquiv: (A=B) \rightarrow (A \simeq B)$.
+\textsc{Definition.} Given two types $A$ and $B$, a function $f : A \rightarrow B$ is an \textbf{equivalence} if we have $\isEquiv(f)$.
 
-\textsc{Definition.} The \textbf{univalence axiom} asserts that we have a term $ua$ of type $isEquiv(idToEquiv)$.
+We write $A \simeq B$ to denote $\Sigma_{f : A \rightarrow B} \isEquiv(f)$. For every type $A$, we have $A \simeq B$, so we can define a function $\idToEquiv: (A=B) \rightarrow (A \simeq B)$.
 
-\section{Univalence for logic and sets}
+\textsc{Definition.} The \textbf{univalence axiom} asserts that we have a term $ua : \isEquiv(\idToEquiv)$.
 
-We define $\Prop = \Sigma_{P:\type} \isProp (P)$. (Note that since $\isProp$ is a proposition, $\isProp \subseteq \type$.)
+\section{Univalence for Logic and Sets}
 
-Fact. The univalence axiom implies $(P =_{\Prop} Q)\simeq (P \leftrightarrow Q)$.
+We define $\Prop := \Sigma_{P:\type} \isProp (P)$. (Note that since $\isProp$ is a proposition, $\isProp \subseteq \type$.)
 
-We define $\Set = \Sigma_{S:\type} \isSet (S)$.
+\begin{fact}
+The univalence axiom implies $(P =_{\Prop} Q)\simeq (P \leftrightarrow Q)$. 
+\end{fact}
 
-Fact. The univalence axiom implies $(P =_{\Set} Q)\simeq (P \cong Q)$.
+We can also define $\Set := \Sigma_{S:\type} \isSet (S)$.
 
-$ \Grp = \Sigma_{G: \Set} \Sigma_{e:G} \Sigma_{m: G\to G \to G} \Sigma_{i:G\to G} \Pi_{x:G} (m(e,x)=x) \times (m(x,e)=x) \times \Pi_{x,y,z:G}((xy)z=x(yz)) \times \Pi_{x:G}(m(ix,x)=x \times (m(x,ix)=e))$
+\begin{fact}
+The univalence axiom implies $(P =_{\Set} Q)\simeq (P \cong Q)$.
+\end{fact}
 
-Fact. The univalence axiom implies $(P =_{\Grp} Q)\simeq (P \cong Q)$.
+Lastly, we can define $ \Grp := \Sigma_{G: \Set} \Sigma_{e:G} \Sigma_{m: G\to G \to G} \Sigma_{i:G\to G} \Pi_{x:G} (m(e,x)=x) \times (m(x,e)=x) \times \Pi_{x,y,z:G}((xy)z=x(yz)) \times \Pi_{x:G}(m(ix,x)=x \times (m(x,ix)=e))$
+
+
+\begin{fact}
+The univalence axiom implies $(P =_{\Grp} Q)\simeq (P \cong Q)$.    
+\end{fact}
+
 
 \bibliographystyle{alpha}
 \bibliography{all}
 
 \appendix
+
+\section{Transport and Fibrations}
+\label{sec:transport-explanation}
+
+As mentioned earlier, the ability to transport along an equality corresponds to the projection map $\pi_1 : \Sigma_{b : B} E(b)$ behaving like a fibration in a QMC. We will now discuss one way to see this, taking the liberty to interpret equalities as a map from the interval type into the target type, as is possible in a QMC (as well as in cubical formulations of HoTT).
+
+\begin{figure}[h]
+    \centering
+    \input{transport-comm-diagram}
+    \caption{Given that the outer diagram commutes, we have that if $\text{pr}_1$ is a fibration, there exists a homotopy lifting map $h$ making everything commute.}
+    \label{fig:transport-as-fibration}
+\end{figure}
+
+Consider Figure \ref{fig:transport-as-fibration}. If the outer diagram commutes, we have the data $b : B$, $e : E(b)$, and a path $p : b = b'$ for some (unstated) $b' : B$.
+
+This follows because, when interpreting $p$ as a map from $I$ to $B$, evaluating $p$ at $0 : I$ must result in $b$ by commutativity.
+
+Then, if $\pi_1$ is a fibration, we get that there exists a homotopy lift $h : (b, e) = (b', e')$ for some (unstated) $e' : E(b')$ that makes the diagram commute.
+
+This is because, when interpreting $h$ as a map from $I$ to $\Sigma_{b : B} E(b)$, evaluating $p$ at $0 : I$ must result in $(b, e)$ by commutativity.
+
+Furthermore, evaluating $h$ at $1 : I$ and then applying $\pi_1$ must result in the same value as evaluating $p$ at $1 : I$, also by commutativity.
+
+Thus, given such an $h$, we can define $tr_p (e)$ to equal $\pi_2 (h (1)) : E(b')$. Thus, if $\pi_1$ is always a fibration, given a term $p : b = b'$, we can define $tr_p : E(b) \to E(b')$.
+
+In the reverse direction, given a term $tr_p : E(b) \to E(b')$ along with the property that $tr_{r_b} \defeq \text{id}_{E(b)}$ (which holds when defining transport using path induction), given that the outer diagram in Figure \ref{fig:transport-as-fibration} commutes, we can define $h : (b, e) = (b', tr_p (e))$.
+
+To do this, we can use the elimination rule for identity types to reduce this problem to the case where $b' \defeq b$ and $p \defeq r_b$. As such, we now want to define $h : (b, e) = (b', tr_{r_b} (e))$.
+
+But as $(b', tr_{r_b} (e))$ definitionally reduces to $(b, \text{id}_{E(b)} (e))$ and then again to $(b, e)$, we get that $h : (b, e) = (b, e)$.
+
+As such, we can just let $h$ be $r_{(b, e)}$ to finish the proof.
+
+Thus, we have that if $\pi_1$ is a fibration, we can construct transport along a path $p : b = b'$ as $tr_b : E(b) \to E(b')$, and if we have transport we can show that $\pi_1$ is a fibration.
+
+As a bonus exercise, prove that this map taking in $tr_p$ and output $h$ is an equivalence!
 
 \section{Solutions}
 \label{sec:exercise-solutions}
@@ -729,4 +916,17 @@ Fact. The univalence axiom implies $(P =_{\Grp} Q)\simeq (P \cong Q)$.
         {\vdash \lambda n : \N.~\lambda m : \N.~\Ind_{\N,0,\mathsf{add}~n~h}(m) : \N \to \N \to \N}
     \end{mathpar}
 \end{sol}
+
+\section{Links and FAQ}
+
+\begin{enumerate}
+    \item \textbf{How does univalence imply functional extensionality?} Here is a blog post detailing that: \href{https://homotopytypetheory.org/2014/02/17/another-proof-that-univalence-implies-function-extensionality/}{Another proof that univalence implies functional extensionality by Dan Licata}.
+
+    Perhaps the biggest takeaway from this article is that this proof that univalence implies functional extensionality is very closely related to the proof in cubical type theory of functional extensionality, which doesn't use univalence! There is something bigger at play here, demonstrating that univalence in some way makes things in MLTT "work better" than it used to.
+
+    Other than that, I highly recommend checking out the article linked above, as it is by far the clearest explanation of this proof that I've seen.
+    \item \textbf{Are h-levels different from universe levels?} Yes! In a type hierarchy such as the one used by Coq, each $\texttt{Type}_i$ has h-level $\infty$.
+    \item \textbf{How does the inductive definition of identity types allow for non-canonical terms?} The crucial difference for identity types is that we are inductively defining a \textit{family} of types in \ref{sec:identity}. The types build by these definitions are indexed by the terms being equated, allowing us to have non-canonical terms.
+\end{enumerate}
+
 \end{document}
