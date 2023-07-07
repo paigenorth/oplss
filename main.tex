@@ -27,9 +27,11 @@
 \theoremstyle{definition}
 \newtheorem{eg}{Example}[section]
 \newtheorem{ex}{Exercise}[section]
+\newtheorem{defn}{Definition}[section]
 \newtheorem*{sol}{Solution}
 \newtheorem*{warn}{Warning}
 \newtheorem*{fact}{Fact}
+\newtheorem*{cor}{Corollary}
 
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.12}
@@ -48,24 +50,32 @@ Introduction to HoTT Notes}
 \newcommand{\ctx}{\ensuremath{\mathsf{~ctx}}}
 \newcommand{\type}{\ensuremath{\mathsf{~type}}}
 \newcommand{\defeq}{\ensuremath{\overset{\boldsymbol{\cdot}}{=}}}
-\newcommand{\Unit}{\ensuremath{\mathsf{1}}}
+\newcommand{\Unit}{\ensuremath{\mathbbm{1}}}
 \newcommand{\Bool}{\ensuremath{\mathsf{Bool}}}
 \newcommand{\Prop}{\ensuremath{\mathsf{Prop}}}
 \newcommand{\isProp}{\ensuremath{\mathsf{isProp}}}
 \newcommand{\Set}{\ensuremath{\mathsf{Set}}}
 \newcommand{\isSet}{\ensuremath{\mathsf{isSet}}}
+\newcommand{\Cat}{\ensuremath{\mathsf{Cat}}}
 \newcommand{\isContr}{\ensuremath{\mathsf{isContr}}}
-\newcommand{\hLevel}[2]{\ensuremath{\mathsf{hLevel}~#1~#2}}
+\newcommand{\isGroupoid}{\ensuremath{\mathsf{isGroupoid}}}
+\newcommand{\isofhlevel}[2]{\ensuremath{\mathsf{isofhlevel}~#1~#2}}
 \newcommand{\isEquiv}{\ensuremath{\mathsf{isEquiv}}}
 \newcommand{\idToEquiv}{\ensuremath{\mathsf{idToEquiv}}}
+\newcommand{\idToIso}{\ensuremath{\mathsf{idToIso}}}
+\newcommand{\Iso}{\ensuremath{\mathsf{Iso}}}
 \newcommand{\Grp}{\ensuremath{\mathsf{Grp}}}
+\newcommand{\Grpd}{\ensuremath{\mathsf{Grpd}}}
 \newcommand{\W}{\ensuremath{\mathsf{W}}}
 \newcommand{\U}{\ensuremath{\mathcal{U}}}
 \newcommand{\True}{\ensuremath{\mathsf{true}}}
 \newcommand{\False}{\ensuremath{\mathsf{false}}}
 \newcommand{\Ind}{\ensuremath{\mathsf{ind}}}
 \newcommand{\Hole}[1]{\fbox{?#1}}
+\newcommand{\ob}{\ensuremath{\mathrm{ob}}}
+\newcommand{\ua}{\ensuremath{\mathsf{ua}}}
 \renewcommand{\emph}{\textbf}
+\renewcommand{\emptyset}{\varnothing}
 
 \newcommand{\newcommenter}[3]{%
   \newcommand{#1}[1]{%
@@ -350,8 +360,9 @@ Construct a function $\pi_1 : \Sigma_{x : B} E(x) \to B$.
 Construct a function $\pi_2 : \Pi_{s : \Sigma_{x : B} E(x)} E(\pi_1 s)$. This is a dependently typed function that takes a term $s : \Sigma_{x : B} E(x)$ and returns something of type $E(\pi_1 s)$.
 \end{ex}
 
-\section{Digression: Pi Types}
-Pi-types can be thought of as dependent function types. Note that they are \textbf{not} an inductive type, but we include a sketch of the rules for them here for clarity.
+\subsection{Digression: Pi Types}
+Pi-types are dependent function types. 
+Note that they are \textbf{not} an inductive type, but we include a sketch of the rules for them here for clarity.
 
 \begin{itemize}
 \item Formation rule:
@@ -524,8 +535,24 @@ See Figure \ref{fig:n-paths}.
 \begin{figure}[h]
     \centering
     \input{n-paths}
-    \caption{An illustration of higher dimensional paths.}
+    \caption{An illustration of higher dimensional paths between two inhabitants $a$ and $b$.}
     \label{fig:n-paths}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.5]{disk.png}
+    \caption{A disk-shaped space $A$ and points $a$, $b$, and $c$ and paths $p$, $q$, and $r$.
+    The paths $p$ and $q$ can be deformed to each other without leaving the space $A$.}
+    \label{fig:disk}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.5]{torus.png}
+    \caption{A torus-shaped space $B$ and points $a$ and $b$ and paths $p$ and $q$.
+    The two paths can't be deformed to each other without leaving the space $B$.}
+    \label{fig:torus}
 \end{figure}
 
 %Why is this "the first homotopical phenomenon"
@@ -601,13 +628,9 @@ Veovosky showed that MLTT can be interpreted in a category of spaces (the catego
 \end{ex}
 This ensures that every dependent type we can construct respects propositional equality. 
 If we think of $E$ as a predicate on $B$, this means that if $E(b)$ is true and $b =_B b'$, then $E(b')$ is true.
-This is known as the \emph{indiscernibility of identicals}.
 
 This is part of a more sophisticated relationship between type theory and homotopy theory (Quillen model category theory, or QMC theory). 
 Transport says that $\pi_{1} : \Sigma_{b : B} E(b) \rightarrow B$ behaves like a fibration in a QMC. For more information, see Appendix $\ref{sec:transport-explanation}$.
-
-\section{Equivalence}
-For types $S, T$, there is a notion of equivalence $S \simeq T$. We will come back to this later, but it is similar to the notion $\Sigma_{f : S \rightarrow T}$ $\Sigma_{g : T \rightarrow S} (\Pi_{x : S} g(f (x)) = x) \times (\Pi_{y : T} f(g(y)) = y)$. (This is informally similar to idea of there being an isomorphism $f$ between $S$ and $T$, with inverse $g$.)
 
 \section{Characterizing Equality in Standard Types}
 
@@ -634,20 +657,25 @@ To avoid inconsistency, we cannot have both $\mathbf{UA}$ and $\mathbf{UIP}$. We
 Both choices make sense, but choosing $\mathbf{UIP}$ would send us in the direction of set theory, not HoTT.
 
 \section{Homotopy Levels}
-In this section, we introduce \emph{homotopy levels}, or h-levels for short, which are defined recursively as follows:
-\begin{align*}
-    \mathsf{hLevel}~0~T &:= \sum_{t : T}\prod_{s : T}(s =_T t)\\
-    \mathsf{hLevel}~S(n)~T &:= \prod_{s,t : T}\mathsf{hLevel}~n~(s = t)
-\end{align*}
+Types in HoTT come equipped with higher-dimensional structures.
+In some types, however, these structures are trivial above a certain dimension.
+In this section, we introduce \emph{homotopy levels}, or h-levels for short, and discuss some special cases.
 
 \subsection{h-level 0}\label{sec:h-level-0}
-A type $T$ is \emph{contractible} (has h-level 0) if there is a \emph{center of contraction} $t$, and for every element $s$ of that type, there is a path from $s$ to $t$.
+A type $T$ is \emph{contractible} (has h-level 0) if there is a \emph{center of contraction} $t$, and for every inhabitant $s$ of that type there is a path from $s$ to $t$.
 \[
     \isContr(T) := \sum_{t : T}\prod_{s : T} (s = t)
 \]
-\begin{ex}
-Show that $\mathbbm{1}$ is contractible.
-\end{ex}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.5]{hlvl0.png}
+    \caption{A type $T$ with h-level 0 has a center of contraction $t$ and every inhabitant has a path to $t$.}
+    \label{fig:h-level-0}
+\end{figure}
+
+For example, the unit type $\Unit$ is contractible.
+Choose $\mathsf{tt}$ to be the center of contraction.
+The result follows by the elimination rule for $\Unit$.
 
 \begin{ex}
 Show that if $T$ is contractible and inhabited, then $T \simeq \mathbbm{1}$.
@@ -661,11 +689,22 @@ Show that if $T$ is contractible and inhabited, then $T \simeq \mathbbm{1}$.
 %\end{figure}
 
 \subsection{h-level 1}\label{sec:h-level-1}
-A type $T$ is a \emph{proposition} if it has h-level 1.
+A type $T$ is a \emph{proposition} (has h-level 1) if for any $s, t : T$ the identity type $s = t$ is contractible.
 \[
-    \hLevel{1}{T} := \prod_{s,t : T}\sum_{q : s = t}\prod_{p : s = t}(p = q)
+    \isProp(T) := \prod_{s,t : T}\isContr(s = t)
 \]
-\begin{ex}
+Note that a proposition does not need to be inhabited.
+For example, the empty type $\varnothing$ is a proposition.
+See Exercise \ref{ex:empty-unit-prop}.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.5]{hlvl1.png}
+    \caption{If a type $T$ has h-level 1, then the identity type $s = t$ between any two inhabitants $s$ and $t$ is contractible.
+    This means that any two proofs of a proposition are equal.}
+    \label{fig:h-level-1}
+\end{figure}
+
+\begin{ex}\label{ex:empty-unit-prop}
 Show that $\emptyset$, $\mathbbm{1}$ are propositions.
 \end{ex}
 
@@ -674,67 +713,211 @@ Show that any contractible type is a proposition.
 \end{ex}
 
 \begin{ex}
-Show that if a proposition is inhabited, then it is contractible. (This says that a proposition is always informally equivalent to $\emptyset$ or $\mathbbm{1}$, i.e., truth values) %I don't think this is actually what this exercise shows but I'm not sure what the correct interpretation of this comment in the notes is
+Show that if a proposition is inhabited, then it is contractible. (This says that a proposition is informally equivalent to $\varnothing$ or $\mathbbm{1}$, i.e., truth values) %I don't think this is actually what this exercise shows but I'm not sure what the correct interpretation of this comment in the notes is
 \end{ex}
 
 \subsection{h-level 2}\label{sec:h-level-2}
-A type $T$ is a \emph{set} if it has h-level 2, i.e., when the equalities are propositions.
+A type $T$ is a \emph{set} (has h-level 2) if for any $s, t : T$ the identity type $s = t$ is a proposition.
 \[
-    \hLevel{2}{T} := \prod_{s,t : T}\prod_{p,q : s = t}\sum_{u : p = q}\prod_{v : p = q}(v = u)
+    \isSet(T) := \prod_{s,t : T}\isProp(s = t)
 \]
-$\N$ and $\Bool$ are sets.
+In other words, $T$ is a set if it looks like a discrete collection of points.
+For example, the types $\N$ and $\Bool$ are sets.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.5]{hlvl2.png}
+    \caption{If a type $T$ has h-level 2, then the identity type $s = t$ between any two inhabitants $s$ and $t$ is a proposition.
+    Thus, $T$ looks like a set.}
+    \label{fig:h-level-2}
+\end{figure}
+
 \subsection{h-level 3}\label{sec:h-level-3}
-A type $T$ is a \emph{groupoid} when it has h-level 3, i.e., when the homotopies are propositions.
+A type $T$ is a \emph{groupoid} (has h-level 3) if for any $s, t : T$ the identity type $s = t$ is a set.
 \[
-    \hLevel{3}{T} := \prod_{s,t : T}\prod_{p,q : s = t}\prod_{u,v : p = q}\sum_{w : u = v}\prod_{x : u = v}(x = w)
+    \isGroupoid(T) := \prod_{s, t : T}\isSet(s = t)
 \]
-A universe $\U$ has h-level at least 3.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.5]{hlvl3.png}
+    \caption{If a type $T$ has h-level 3, then the identity type $s = t$ between any two inhabitants $s$ and $t$ is a set.
+    Thus, $T$ looks like a groupoid.}
+    \label{fig:h-level-3}
+\end{figure}
+
+In general, $\isofhlevel{n}{T}$ is defined recursively as follows:
+\begin{align*}
+    \isofhlevel{0}{T} &:= \isContr(T)\\
+    \isofhlevel{S(n)}{T} &:= \prod_{s,t : T}\isofhlevel{n}{T}
+\end{align*}
 
 \begin{ex}
 Show that if a type $T$ has h-level $n$, then it has h-level $n + 1$.
 \end{ex}
 
 \section{Equivalences}
-Sometimes we want types to be propositions, i.e., to have no structure. In other situations we may want to have the structure.
-
-Given two types $A$ and $B$ and a function $f : A \rightarrow B$, we want a \textbf{proposition} $\isEquiv(f)$ encapsulating the idea that $f$ is a bijection, or ``equivalence''.
-
-The type $\Sigma_{g : B \rightarrow A} (f \circ g = 1_B) \times (g \circ f = 1_A)$ encapsulates this idea, but it is not a  proposition. Alternatively, we can define adjoint equivalence:
-
+Given a function $f : A \to B$, we can define $\isEquiv(f)$ by
+\[
+    \sum_{g : B \to A} (g \circ f = 1_{A}) \times (f \circ g = 1_{B})
+\]
+Sadly, this type is not a proposition.
+Thus, it has nontrivial high-dimensional structures that we don't want.
+To remedy this, recall that a set-theoretic function $f : A \to B$ is a bijection if for all $b \in B$, the fiber over $b$ is a singleton set.
+This suggests an alternative definition for $\isEquiv(f)$.
+\begin{defn}
 \begin{align*}
-\isEquiv(f) &:= \Pi_{b : B} \isContr(\Sigma_{a : A} f(a)=b)
+    \isEquiv(f) &:= \prod_{b : B} \isContr\left(\sum_{a : A} f(a)=b\right)
 \end{align*}
+\end{defn}
+This states that for every $b : B$, the fiber over $b$ is contractible, i.e., there exists a unique element in the preimage of $f$.
 
-
-
-The part $\isContr(\Sigma_{a : A} f(a)=b)$ states that 1 is a fiber. %?
-
-\textsc{Definition.} Given two types $A$ and $B$, a function $f : A \rightarrow B$ is an \textbf{equivalence} if we have $\isEquiv(f)$.
-
-We write $A \simeq B$ to denote $\Sigma_{f : A \rightarrow B} \isEquiv(f)$. For every type $A$, we have $A \simeq B$, so we can define a function $\idToEquiv: (A=B) \rightarrow (A \simeq B)$.
-
-\textsc{Definition.} The \textbf{univalence axiom} asserts that we have a term $ua : \isEquiv(\idToEquiv)$.
+\begin{defn}[Equivalence]
+    Given any two types $A, B : \U$, we write $A \simeq B$ to denote the type $\displaystyle\sum_{f : A \to B} \isEquiv(f)$.
+\end{defn}
+For any two types $A, B : \U$, we can construct a function $\idToEquiv : (A = B) \to (A \simeq B)$ by path induction.
+\begin{defn}[Univalence Axiom]
+    The \emph{univalence axiom} asserts that 
+    \[\ua : \isEquiv(\idToEquiv)\]
+\end{defn}
+An immediate consequence of this axiom is that $(A = B) \simeq (A \simeq B)$.
 
 \section{Univalence for Logic and Sets}
+\begin{defn}
+    We define the type of propositions as the following sigma type:
+    \[\Prop := \sum_{P : \U} \isProp(P)\]
+\end{defn}
+The univalence axiom implies that the type $\Prop$ is univalent.
+That is, for any $P, Q : \Prop$,
+\[
+    (P = Q) \simeq (P \leftrightarrow Q)
+\]
+As a corollary, the type $\Prop$ is a set rather than a proposition because there are propositions that are not interprovable, but all the interprovable ones can be identified.
+We define the type of sets in the same fashion.
+\begin{defn}
+\[
+    \Set := \sum_{S : \U} \isSet(S)
+\]
+\end{defn}
+Similarly, the univalence axiom implies that $\Set$ is univalent.
+\[
+    (S = T) \simeq (S \cong T)
+\]
+As a consequence, $\Set$ is a groupoid because, for example, the set containing two elements is isomorphic to itself in two different ways.
 
-We define $\Prop := \Sigma_{P:\type} \isProp (P)$. (Note that since $\isProp$ is a proposition, $\isProp \subseteq \type$.)
+With $\Set$ in hand, we can define the type of groups.
+Recall that a group consists of a carrier set $G$, a neutral element $e$, a multiplication operator $\cdot$, and an inverse operator $-^{-1}$ such that
+\begin{enumerate}
+    \item $e \cdot g = g$ for all $g \in G$,
+    \item $g \cdot e = g$ for all $g \in G$,
+    \item $(g \cdot h) \cdot k = g \cdot (h \cdot k)$ for all $g, h, k \in G$,
+    \item $g^{-1} \cdot g = e$ for all $g \in G$, and
+    \item $g \cdot g^{-1} = e$ for all $g \in G$.
+\end{enumerate}
+\begin{defn}
+    \begin{align*}
+        \Grp := \sum_{G : \Set}&\sum_{e : G}\sum_{\cdot : G \to G \to G}\sum_{-^{-1} : G \to G}\left(\prod_{g : G} e \cdot g = g\right) \times\\
+        &\left(\prod_{g : G} g \cdot e = g\right) \times \left(\prod_{g,h,k : G}(g \cdot h) \cdot k = g \cdot (h \cdot k)\right) \times\\
+        &\left(\prod_{g : G}g^{-1} \cdot g = e\right) \times \left(\prod_{g : G}g \cdot g^{-1} = e\right)
+    \end{align*}
+\end{defn}
+The role of the inhabitants of the group axioms is to serve as a \emph{witness} that the neutral element, the multiplication, and the inverse of a group interact properly.
+We don't want the group axioms to carry additional structures.
+Thus, the carrier $G$ needs to be a set to ensure that the group axioms are propositions.
+
+%This encodes the existence of an identity ($e$), a partial binary operator ($m$), and an inverse operator $i$ satisfying the groupoid axioms ($e$ acts as an identity, $m$ is associative, and %inverses act as inverses). %is m partial? this seems like it's actually a group not a groupoid?
+
+Again, the univalence axiom implies that for any two groups, $G$ and $H$,
+\[(G = H)\simeq (G \cong H).\]
+In fact, any algebraic structure on a set has a univalence result \cite{coq:isomorphism-is-equality}.
+
+%\textsc{Definition.} An algebraic structure is %needs definition from github once paige adds it there
+
+The moral of the story is that univalence allows us to do mathematics up to some appropriate notion of ``sameness".
+For example, the appropriate notion of sameness for groups is group isomorphisms.
+The \textbf{Structure Identity Principle} (Aczel, Coqand) is the idea that an isomorphism (or our notions of equivalence) should respect the structure of a given type.
+The \textbf{Identity of Indiscernables} (Leibniz) states that any two objects that have all their properties in common cannot be distinct.
+Univalence allows us to treat isomorphic, or structurally identical, types as exactly equal, incorporating these principles into our theory.
+
+\section{Category Theory}
+
+Our definition of a category will involve groupoids, so we start with defining a groupoid as follows: $\Grpd:= \Sigma_{T:\U} \isofhlevel{3}{T}$. We have a univalence principle for groupoids:
 
 \begin{fact}
-The univalence axiom implies $(P =_{\Prop} Q)\simeq (P \leftrightarrow Q)$. 
+    $(G=_{\Grpd}H) \simeq (G\cong H)$
 \end{fact}
 
-We can also define $\Set := \Sigma_{S:\type} \isSet (S)$.
+How do we define categories in univalent foundations? A category is usually defined as a bunch of sets. We could do this, but:
+
+\begin{itemize}
+    \item we stay in the set level (everything in mathematics is a bunch of sets);
+    \item the SIP for structures on sets tells us that $(\mathcal C =_{\Cat} \mathcal D) \simeq (\mathcal C \cong \mathcal D)$, and isomorphism is not the right kind of sameness for categories.
+\end{itemize}
+
+Instead, we take a groupoid and put extra structure on it. Every category will have a `core groupoid' -- the objects and all invertible morphisms.
+
+Formally, a \emph{category} $\mathcal C$ consists of:
+\begin{itemize}
+    \item a groupoid $\ob \mathcal C$;
+    \item a set $\hom(X,Y)$ for every pair $X,Y \in \ob \mathcal C$, i.e., $$X,Y : \ob \mathcal C \vdash \hom(X,Y) : \Set;$$
+    \item a term $1_X: \hom(X,X)$ for every $X\in\ob \mathcal C$, i.e., $$X:\ob \mathcal C \vdash 1_X: \hom(X,X);$$
+    \item a function $\circ: \hom(X,Y)\times \hom(Y,Z) \to \hom(X,Z)$ for every $X,Y,Z\in \ob\mathcal C$, i.e., $$X,Y,Z: \ob \mathcal C \vdash \circ : \hom(X,Y)\to \hom(Y,Z)\to \hom(X,Z),$$
+\end{itemize}
+such that 
+
+\begin{itemize}
+    \item the morphism $\idToIso: (X=Y) \to \Iso(X,Y)$ is an equivalence, where $$\Iso(X,Y) := \Sigma_{f:\hom(X,Y)} \Sigma_{g:\hom(X,Y)} g\circ f = 1_X \times f\circ g = 1_Y$$
+    \item \dots
+\end{itemize}
+
+In other words, $\Cat := \Sigma_{\ob \mathcal C:\Grpd} \Sigma_{\hom: \ob\mathcal C\to\ob\mathcal C\to \Set}\Sigma_{1:\Pi_{X:\ob \mathcal C}\hom(X,X)} \dots$. Note that this is often called a \emph{univalent category} and the requirement that $\idToIso$ be an equivalence is called (internal) univalence.
 
 \begin{fact}
-The univalence axiom implies $(P =_{\Set} Q)\simeq (P \cong Q)$.
+($\mathcal{C} =_{\Cat} \mathcal{D}) \simeq (\mathcal{C} \cong \mathcal{D}) $ 
 \end{fact}
 
-Lastly, we can define $ \Grp := \Sigma_{G: \Set} \Sigma_{e:G} \Sigma_{m: G\to G \to G} \Sigma_{i:G\to G} \Pi_{x:G} (m(e,x)=x) \times (m(x,e)=x) \times \Pi_{x,y,z:G}((xy)z=x(yz)) \times \Pi_{x:G}(m(ix,x)=x \times (m(x,ix)=e))$
+\begin{cor}
+    $\Cat$ is a $2$-groupoid (h-level $4$).
+\end{cor}
 
+This is a great achievement for univalent foundations.
+\begin{itemize}
+    \item evil vs.\ non-evil, practice of CT; % I'm typing this before the lecture, and I'm not sure what she means here
+    \item now part of the theory.
+\end{itemize}
 
-\begin{fact}
-The univalence axiom implies $(P =_{\Grp} Q)\simeq (P \cong Q)$.    
-\end{fact}
+The type $\Cat$ consists of:
+
+\begin{itemize}
+    \item terms $\rightsquigarrow$ categories;
+    \item equalities $\rightsquigarrow$ equivalence of categories.
+\end{itemize}
+
+We now define functors and natural transformations. A \emph{functor} $F: \mathcal{C}\to\mathcal{D}$ consists of:
+\begin{itemize}
+    \item a function $\ob{F}:\ob{C}\to\ob{D}$;
+    \item functions $\hom_{\mathcal C}(X,Y)\to \hom_{\mathcal D}(FX,FY)$ for all $X,Y\in \mathcal C$
+\end{itemize}
+such that the compositions and identities are preserved.
+
+The type of functors $[\mathcal C, \mathcal D]$ is not a set.
+\begin{enumerate}
+    \item terms $\rightsquigarrow$ functions;
+    \item equalities $\rightsquigarrow$ natural transformations.
+\end{enumerate}
+
+A \emph{natural transformation} $\eta: F \implies G: \mathcal{C}\to\mathcal{D}$ consists of $\eta_X:\hom(FX,GX)$ for all $X:\ob{\mathcal{C}}$ such that the following square commutes for all $X,Y:\ob{\mathcal{C}}$ and all $f:\hom(X,Y)$:
+
+\begin{center}
+\begin{tikzcd}
+FX \arrow[r, "Ff"] \arrow[d, "\eta_X"]
+& FY \arrow[d, "\eta_Y"] \\
+GX \arrow[r, "Gf"]
+& || GY
+\end{tikzcd}
+\end{center}
+
+The type of natural transformations $F\implies G$ is a set.
+
+We can also form a \emph{bicategory} of categories. We have univalence for bicategories, as well as for any higher (but finite) algebraic structure.
 
 
 \bibliographystyle{alpha}
@@ -750,7 +933,7 @@ As mentioned earlier, the ability to transport along an equality corresponds to 
 \begin{figure}[h]
     \centering
     \input{transport-comm-diagram}
-    \caption{Given that the outer diagram commutes, we have that if $\text{pr}_1$ is a fibration, there exists a homotopy lifting map $h$ making everything commute.}
+    \caption{Given that the outer diagram commutes, we have that if $\pi_1$ is a fibration, there exists a homotopy lifting map $h$ making everything commute.}
     \label{fig:transport-as-fibration}
 \end{figure}
 
