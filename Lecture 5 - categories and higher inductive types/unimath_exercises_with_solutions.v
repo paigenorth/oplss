@@ -86,7 +86,37 @@ Defined.
 
 (* Hint: use ~weqtopaths~, ~isapropweqtoprop~, ~subtypeInjectivity~, and ~isapropisofhlevel~. *)
 
+Lemma equiv_to_id {A B : UU} (e : A ≃ B) : (A = B).
+Proof.
+    set (u := (eqweqmap,,(ua A B))).
+    exact (invmap u e).
+Defined.
+
+Lemma ua_eq (A B : UU) : (A = B) = (A ≃ B).
+Proof.
+    exact (equiv_to_id (eqweqmap,,ua A B)).
+Defined.
+
+Set Printing All.
+
 Theorem hProp_is_Set : isaset hProp.
 Proof.
-Admitted.
+  intros P Q.
+  induction P as [P p].
+  induction Q as [Q q].
+  set (a := subtypeInjectivity isaprop (isapropisofhlevel 1) (P,,p) (Q,,q)).
+  set (b := (equiv_to_id a)).
+  simpl in b.
+  assert (∏ (A B : UU), B = A → isaprop A → isaprop B) as my_rewrite.
+  {
+    intros A B e h.
+    induction e.
+    exact h.
+  }
+  apply (my_rewrite (P = Q) (P,, p = Q,, q) b).
+  set (c := isapropweqtoprop P Q q).
+  set (d := !(ua_eq P Q)).
+  apply (my_rewrite (P ≃ Q) (P = Q) (!d)).
+  exact c.
+Defined.
 
